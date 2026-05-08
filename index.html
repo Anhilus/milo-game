@@ -11,10 +11,19 @@
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
     <style>
         :root {
-            --pink: #FF0080;
+            --pink: #FF1493;
             --blue: #00FFFF;
             --green: #32CD32;
             --gold: #FFD700;
+            --purple: #9D00FF;
+            --orange: #FF6B00;
+            --cyan: #00E5FF;
+            --lime: #CCFF00;
+        }
+
+        * {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         body, html {
@@ -24,15 +33,16 @@
             height: 100%;
             overflow: hidden;
             font-family: 'Fredoka One', cursive, sans-serif;
-            background: linear-gradient(-45deg, #FF0080, #00FFFF, #32CD32, #FF0080) !important;
-            background-size: 400% 400% !important;
-            animation: gradientBG 15s ease infinite;
+            background: linear-gradient(-45deg, #FF1493, #00FFFF, #32CD32, #9D00FF, #FF6B00) !important;
+            background-size: 500% 500% !important;
+            animation: gradientBG 12s ease infinite;
             color: #ffffff !important;
             display: flex;
             justify-content: center;
             align-items: center;
             touch-action: none;
             -webkit-text-size-adjust: 100%;
+            will-change: background-position;
         }
 
         @keyframes gradientBG {
@@ -61,11 +71,13 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            background: rgba(0,0,0,0.25);
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             padding: 40px 20px;
             border-radius: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            border: 4px solid rgba(255,255,255,0.5);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            border: 4px solid rgba(255,255,255,0.6);
             z-index: 10;
             position: relative;
         }
@@ -119,13 +131,13 @@
             color: #fff;
             cursor: pointer;
             border-radius: 15px;
-            transition: background 0.3s, transform 0.1s;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .toggle-btn.active {
             background: var(--pink);
             color: #fff;
-            box-shadow: 0 0 10px rgba(255,0,128,0.5);
+            box-shadow: 0 0 15px rgba(255,20,147,0.7);
             transform: scale(1.05);
         }
 
@@ -137,13 +149,14 @@
             border-radius: 20px;
             cursor: pointer;
             box-shadow: 4px 8px 0px #000;
-            transition: transform 0.1s, box-shadow 0.1s;
+            transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
             text-transform: uppercase;
             outline: none;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
             min-width: 150px;
             min-height: 50px;
+            will-change: transform, box-shadow;
         }
 
         .btn:active {
@@ -198,12 +211,12 @@
 
         @keyframes pulseWin {
             0% { box-shadow: 0 0 0 0 rgba(50, 205, 50, 0.7), 4px 8px 0px #000; }
-            70% { box-shadow: 0 0 0 20px rgba(50, 205, 50, 0), 4px 8px 0px #000; }
+            70% { box-shadow: 0 0 0 25px rgba(50, 205, 50, 0), 4px 8px 0px #000; }
             100% { box-shadow: 0 0 0 0 rgba(50, 205, 50, 0), 4px 8px 0px #000; }
         }
 
         .btn-lose {
-            background: #FF0080 !important;
+            background: #FF1493 !important;
             color: #ffffff !important;
             -webkit-text-fill-color: #ffffff !important;
         }
@@ -234,28 +247,36 @@
         #frustration-bar {
             width: 0%;
             height: 100%;
-            background: linear-gradient(90deg, var(--green), #FFEA00, var(--pink));
-            background-size: 200% 100%;
-            transition: width 0.3s ease-out;
-            box-shadow: 0 0 10px rgba(255,0,128,0.8);
+            background: linear-gradient(90deg, #32CD32, #CCFF00, #FFD700, #FF6B00, #FF1493, #9D00FF);
+            background-size: 300% 100%;
+            animation: frustrationShift 2s ease infinite;
+            transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 15px rgba(255,20,147,0.9);
         }
 
-        /* Taunt Messages */
+        @keyframes frustrationShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Taunt Messages with Emojis */
         .taunt {
             position: absolute;
             color: white;
-            font-size: 1.8rem;
+            font-size: 1.9rem;
             font-weight: bold;
-            text-shadow: 3px 3px 0 #000;
+            text-shadow: 3px 3px 0 #000, 2px 2px 10px rgba(0,0,0,0.5);
             pointer-events: none;
-            animation: floatUp 1s ease-out forwards;
+            animation: floatUp 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
             z-index: 50;
             transform: translate(-50%, -50%);
+            white-space: nowrap;
         }
 
         @keyframes floatUp {
-            0% { opacity: 1; margin-top: 0; scale: 1; }
-            100% { opacity: 0; margin-top: -80px; scale: 1.5; }
+            0% { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+            100% { opacity: 0; transform: translate(-50%, -150%) scale(1.3) rotate(10deg); }
         }
 
         /* Credit Styling */
@@ -265,7 +286,7 @@
             text-align: center;
             background: linear-gradient(90deg, #FFD700, #FFA500, #FFEA00, #FFD700);
             background-size: 300% auto;
-            color: #FFD700; /* Fallback */
+            color: #FFD700;
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -371,26 +392,30 @@
         // --- SCREEN 1 LOGIC ---
         let selectedWinner = 'yes';
         
-        document.getElementById('toggle-yes').addEventListener('click', (e) => {
+        const toggleYes = document.getElementById('toggle-yes');
+        const toggleNo = document.getElementById('toggle-no');
+        
+        toggleYes.addEventListener('click', (e) => {
             selectedWinner = 'yes';
             e.target.classList.add('active');
-            document.getElementById('toggle-no').classList.remove('active');
+            toggleNo.classList.remove('active');
         });
         
-        document.getElementById('toggle-no').addEventListener('click', (e) => {
+        toggleNo.addEventListener('click', (e) => {
             selectedWinner = 'no';
             e.target.classList.add('active');
-            document.getElementById('toggle-yes').classList.remove('active');
+            toggleYes.classList.remove('active');
         });
 
-        document.getElementById('create-btn').addEventListener('click', () => {
+        const createBtn = document.getElementById('create-btn');
+        createBtn.addEventListener('click', () => {
             let input = document.getElementById('q-input').value.trim();
             if (!input) input = document.getElementById('q-input').placeholder;
             
             const newUrl = window.location.origin + window.location.pathname + `?q=${encodeURIComponent(input)}&w=${selectedWinner}`;
             
             // Show share UI
-            document.getElementById('create-btn').style.display = 'none';
+            createBtn.style.display = 'none';
             const shareSec = document.getElementById('share-section');
             shareSec.style.display = 'flex';
             
@@ -431,7 +456,6 @@
 
         // --- SCREEN 2 LOGIC ---
         function initGameTransition() {
-            // Init audio context on user gesture
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             }
@@ -442,11 +466,12 @@
             startScreen3();
         }
 
-        document.getElementById('answer-btn').addEventListener('click', initGameTransition);
-        document.getElementById('answer-btn').addEventListener('touchstart', (e) => {
+        const answerBtn = document.getElementById('answer-btn');
+        answerBtn.addEventListener('click', initGameTransition);
+        answerBtn.addEventListener('touchstart', (e) => {
             e.preventDefault();
             initGameTransition();
-        }, { passive: false });
+        }, { passive: false, once: true });
 
         // --- SCREEN 3 LOGIC (THE GAME) ---
         let gameActive = false;
@@ -464,24 +489,15 @@
         // Lightweight lerp function — no library needed
         function lerp(a, b, t) { return a + (b - a) * t; }
 
-        document.addEventListener('mousemove', e => {
-            mouseX = e.clientX; mouseY = e.clientY;
-        });
-        document.addEventListener('touchmove', e => {
-            if (e.touches.length > 0) {
-                mouseX = e.touches[0].clientX;
-                mouseY = e.touches[0].clientY;
-            }
-        }, {passive: true});
-        document.addEventListener('touchstart', e => {
-            if (e.touches.length > 0) {
-                mouseX = e.touches[0].clientX;
-                mouseY = e.touches[0].clientY;
-            }
-        }, {passive: true});
-        document.addEventListener('touchend', e => {
-            if (e.touches.length === 0) { mouseX = -1000; mouseY = -1000; }
-        }, {passive: true});
+        const handleMove = e => { mouseX = e.clientX; mouseY = e.clientY; };
+        const handleTouchMove = e => { if (e.touches.length > 0) { mouseX = e.touches[0].clientX; mouseY = e.touches[0].clientY; } };
+        const handleTouchStart = e => { if (e.touches.length > 0) { mouseX = e.touches[0].clientX; mouseY = e.touches[0].clientY; } };
+        const handleTouchEnd = () => { mouseX = -1000; mouseY = -1000; };
+
+        document.addEventListener('mousemove', handleMove, { passive: true });
+        document.addEventListener('touchmove', handleTouchMove, { passive: true });
+        document.addEventListener('touchstart', handleTouchStart, { passive: true });
+        document.addEventListener('touchend', handleTouchEnd, { passive: true });
 
         function setTransform(el, x, y, scale) {
             el.style.transform = `translate(calc(${x}px - 50%), calc(${y}px - 50%)) scale(${scale})`;
@@ -520,13 +536,15 @@
             setTransform(loseBtnC, loseX, loseY, 1);
             targetLoseX = loseX; targetLoseY = loseY;
 
-            loseBtnC.addEventListener('mouseover', () => forceRunAway(true));
+            loseBtnC.addEventListener('mouseenter', () => forceRunAway(true));
             loseBtnC.addEventListener('touchstart', (e) => {
-                e.preventDefault(); forceRunAway(true);
+                e.preventDefault(); 
+                if(gameActive) forceRunAway(true);
             }, { passive: false });
             winBtnC.addEventListener('click', winGame);
             winBtnC.addEventListener('touchstart', (e) => {
-                e.preventDefault(); winGame();
+                e.preventDefault(); 
+                if(gameActive) winGame();
             }, { passive: false });
 
             gameActive = true;
@@ -537,7 +555,7 @@
         function forceRunAway(ignoreDebounce = false) {
             if (!gameActive) return;
             let now = Date.now();
-            let debounceTime = ignoreDebounce ? 50 : 300;
+            let debounceTime = ignoreDebounce ? 50 : 250;
             if (now - lastRunAwayTime < debounceTime) return;
             lastRunAwayTime = now;
 
@@ -547,44 +565,51 @@
         }
 
         function increaseFrustration() {
-            frustration = Math.min(100, frustration + 12);
+            frustration = Math.min(100, frustration + 10);
             document.getElementById('frustration-bar').style.width = frustration + '%';
             showTaunt(loseX, loseY);
-            if (navigator.vibrate) navigator.vibrate(50);
-            // Slow, teasing shrink — only 0.04 per hit
-            loseTargetScale = Math.max(0.3, loseTargetScale - 0.04);
-            winTargetScale  = Math.min(1.8, winTargetScale  + 0.05);
+            if (navigator.vibrate && frustration < 100) navigator.vibrate(30);
+            loseTargetScale = Math.max(0.4, loseTargetScale - 0.03);
+            winTargetScale  = Math.min(1.5, winTargetScale  + 0.04);
         }
 
         function gameLoop() {
             if (!gameActive) return;
 
-            // Smooth position lerp (60fps butter)
-            loseX = lerp(loseX, targetLoseX, 0.1);
-            loseY = lerp(loseY, targetLoseY, 0.1);
+            loseX = lerp(loseX, targetLoseX, 0.15);
+            loseY = lerp(loseY, targetLoseY, 0.15);
 
-            // Smooth scale lerp — slow tease effect
-            loseCurrentScale = lerp(loseCurrentScale, loseTargetScale, 0.03);
-            winCurrentScale  = lerp(winCurrentScale,  winTargetScale,  0.03);
+            loseCurrentScale = lerp(loseCurrentScale, loseTargetScale, 0.05);
+            winCurrentScale  = lerp(winCurrentScale,  winTargetScale,  0.05);
 
             setTransform(loseBtnC, loseX, loseY, loseCurrentScale);
             setTransform(winBtnC, winPosX, winPosY, winCurrentScale);
 
-            // Proximity check
             let dist = Math.hypot(mouseX - loseX, mouseY - loseY);
-            let threshold = 120 * loseCurrentScale + (window.innerWidth < 600 ? 60 : 40);
+            let threshold = 100 * loseCurrentScale + (window.innerWidth < 600 ? 50 : 30);
             if (dist < threshold) forceRunAway();
 
             requestAnimationFrame(gameLoop);
         }
 
         function showTaunt(x, y) {
-            const taunts = ["Missed!", "Too Slow!", "Nope!", "Try Again!", "Haha!", "Almost!", "Sike!"];
+            const taunts = [
+                "🙈 Nice try!",
+                "😜 Close!",
+                "🤣 Nope!",
+                "😅 Too slow!",
+                "🎯 Almost!",
+                "😂 Sike!",
+                "🫣 Missed!",
+                "💨 Whoops!",
+                "😏 Try again!",
+                "🙃 Haha!"
+            ];
             const t = document.createElement('div');
             t.className = 'taunt';
             t.innerText = taunts[Math.floor(Math.random() * taunts.length)];
             t.style.left = x + 'px';
-            t.style.top = y + 'px';
+            t.style.top = (y - 30) + 'px';
             document.body.appendChild(t);
             setTimeout(() => t.remove(), 1000);
         }
@@ -609,11 +634,12 @@
             window.location.href = window.location.origin + window.location.pathname;
         }
 
-        document.getElementById('restart-btn').addEventListener('click', restartApp);
-        document.getElementById('restart-btn').addEventListener('touchstart', (e) => {
+        const restartBtn = document.getElementById('restart-btn');
+        restartBtn.addEventListener('click', restartApp);
+        restartBtn.addEventListener('touchstart', (e) => {
             e.preventDefault();
             restartApp();
-        }, { passive: false });
+        }, { passive: false, once: true });
 
         // --- AUDIO SYSTEM ---
         function playVictorySound() {
@@ -643,7 +669,7 @@
             playNote(1046.50, now + 0.3, 0.6); // C6
         }
 
-        // --- CONFETTI SYSTEM ---
+        // --- CONFETTI SYSTEM (Lightweight & Optimized) ---
         let confettiActive = false;
         let canvas, ctx;
         let confettis = [];
@@ -661,17 +687,19 @@
             canvas.style.pointerEvents = 'none';
             canvas.style.zIndex = '9999';
 
-            // 60 particles — smooth on all devices
-            for(let i=0; i<60; i++) {
+            // Vibrant colors with new palette
+            const colors = ['#FF1493', '#00FFFF', '#32CD32', '#FFD700', '#FFFFFF', '#9D00FF', '#FF6B00', '#CCFF00'];
+            
+            for(let i=0; i<50; i++) {
                 confettis.push({
                     x: Math.random() * canvas.width,
                     y: Math.random() * canvas.height - canvas.height,
-                    w: Math.random() * 10 + 5,
-                    h: Math.random() * 10 + 5,
-                    c: ['#FF0080', '#00FFFF', '#32CD32', '#FFD700', '#FFFFFF'][Math.floor(Math.random()*5)],
-                    v: Math.random() * 4 + 2,
+                    w: Math.random() * 8 + 4,
+                    h: Math.random() * 8 + 4,
+                    c: colors[Math.floor(Math.random() * colors.length)],
+                    v: Math.random() * 3 + 2,
                     a: Math.random() * 360,
-                    s: Math.random() * 0.08 + 0.02
+                    s: Math.random() * 0.06 + 0.02
                 });
             }
         }
@@ -679,7 +707,8 @@
         function renderConfetti() {
             if(!confettiActive) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            confettis.forEach(c => {
+            for(let i=0; i<confettis.length; i++) {
+                const c = confettis[i];
                 c.y += c.v;
                 c.a += c.s;
                 if(c.y > canvas.height) {
@@ -692,7 +721,7 @@
                 ctx.fillStyle = c.c;
                 ctx.fillRect(-c.w/2, -c.h/2, c.w, c.h);
                 ctx.restore();
-            });
+            }
             requestAnimationFrame(renderConfetti);
         }
     </script>
