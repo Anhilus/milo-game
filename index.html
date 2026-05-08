@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en" style="color-scheme:light!important;background:#FF0080!important">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="color-scheme" content="only light">
+    <meta name="theme-color" content="#FF0080">
+    <title>Milo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --pink: #FF0080;
+            --blue: #00FFFF;
+            --green: #32CD32;
+            --gold: #FFD700;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Fredoka One', cursive, sans-serif;
+            background: linear-gradient(-45deg, #FF0080, #00FFFF, #32CD32, #FF0080) !important;
+            background-size: 400% 400% !important;
+            animation: gradientBG 15s ease infinite;
+            color: #ffffff !important;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            touch-action: none;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        #logo {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 3px 3px 0 #000;
+            z-index: 100;
+            user-select: none;
+        }
+
+        .screen {
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: rgba(0,0,0,0.25);
+            padding: 40px 20px;
+            border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: 4px solid rgba(255,255,255,0.5);
+            z-index: 10;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: #ffffff !important;
+            -webkit-text-fill-color: #ffffff !important;
+            text-shadow: 4px 4px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+            margin-bottom: 30px;
+            line-height: 1.2;
+        }
+
+        input[type="text"] {
+            width: 80%;
+            padding: 15px;
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.2rem;
+            border: 4px solid #000;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            outline: none;
+            background: #ffffff !important;
+            color: #000000 !important;
+            -webkit-text-fill-color: #000000 !important;
+            box-shadow: inset 3px 3px 6px rgba(0,0,0,0.2);
+        }
+
+        .toggle-container {
+            margin-bottom: 30px;
+            font-size: 1.2rem;
+            text-shadow: 2px 2px 0 #000;
+        }
+
+        .toggle {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+            background: #000;
+            border-radius: 20px;
+            padding: 5px;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            padding: 10px 20px;
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.2rem;
+            border: none;
+            background: transparent;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 15px;
+            transition: background 0.3s, transform 0.1s;
+        }
+
+        .toggle-btn.active {
+            background: var(--pink);
+            color: #fff;
+            box-shadow: 0 0 10px rgba(255,0,128,0.5);
+            transform: scale(1.05);
+        }
+
+        .btn {
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.5rem;
+            padding: 15px 30px;
+            border: 4px solid #000;
+            border-radius: 20px;
+            cursor: pointer;
+            box-shadow: 4px 8px 0px #000;
+            transition: transform 0.1s, box-shadow 0.1s;
+            text-transform: uppercase;
+            outline: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            min-width: 150px;
+            min-height: 50px;
+        }
+
+        .btn:active {
+            transform: translateY(4px) !important;
+            box-shadow: 4px 4px 0px #000 !important;
+        }
+
+        .btn-action {
+            background: var(--gold);
+            color: #000;
+        }
+        .btn-action:hover {
+            background: #FFEA00;
+        }
+
+        /* Screen 3 specialized styles */
+        #screen3 {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 10;
+            overflow: hidden;
+        }
+
+        .game-question {
+            position: absolute;
+            top: 15%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            font-size: 2.5rem;
+            text-align: center;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .game-btn-container {
+            position: absolute;
+            left: 0;
+            top: 0;
+            will-change: transform;
+            z-index: 20;
+        }
+
+        .btn-win {
+            background: var(--green);
+            color: white;
+            animation: pulseWin 2s infinite;
+        }
+
+        @keyframes pulseWin {
+            0% { box-shadow: 0 0 0 0 rgba(50, 205, 50, 0.7), 4px 8px 0px #000; }
+            70% { box-shadow: 0 0 0 20px rgba(50, 205, 50, 0), 4px 8px 0px #000; }
+            100% { box-shadow: 0 0 0 0 rgba(50, 205, 50, 0), 4px 8px 0px #000; }
+        }
+
+        .btn-lose {
+            background: #FF0080 !important;
+            color: #ffffff !important;
+            -webkit-text-fill-color: #ffffff !important;
+        }
+        .btn-win {
+            background: #32CD32 !important;
+            color: #ffffff !important;
+            -webkit-text-fill-color: #ffffff !important;
+        }
+        .btn-action {
+            background: #FFD700 !important;
+            color: #000000 !important;
+            -webkit-text-fill-color: #000000 !important;
+        }
+
+        /* Frustration Meter */
+        #frustration-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 15px;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            z-index: 200;
+            border-bottom: 3px solid #000;
+        }
+
+        #frustration-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--green), #FFEA00, var(--pink));
+            background-size: 200% 100%;
+            transition: width 0.3s ease-out;
+            box-shadow: 0 0 10px rgba(255,0,128,0.8);
+        }
+
+        /* Taunt Messages */
+        .taunt {
+            position: absolute;
+            color: white;
+            font-size: 1.8rem;
+            font-weight: bold;
+            text-shadow: 3px 3px 0 #000;
+            pointer-events: none;
+            animation: floatUp 1s ease-out forwards;
+            z-index: 50;
+            transform: translate(-50%, -50%);
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 1; margin-top: 0; scale: 1; }
+            100% { opacity: 0; margin-top: -80px; scale: 1.5; }
+        }
+
+        /* Credit Styling */
+        .credit {
+            font-size: 2.2rem;
+            margin: 30px 0;
+            text-align: center;
+            background: linear-gradient(90deg, #FFD700, #FFA500, #FFEA00, #FFD700);
+            background-size: 300% auto;
+            color: #FFD700; /* Fallback */
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: goldShine 3s linear infinite;
+            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.4));
+        }
+
+        @keyframes goldShine {
+            0% { background-position: 0% center; }
+            100% { background-position: 300% center; }
+        }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 2rem; }
+            .btn { font-size: 1.2rem; padding: 12px 24px; }
+            .game-question { font-size: 2rem; top: 10%; }
+            .credit { font-size: 1.6rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="logo">🎮 Milo</div>
+
+    <div id="frustration-container">
+        <div id="frustration-bar"></div>
+    </div>
+
+    <!-- SCREEN 1: QUESTION CREATION -->
+    <div id="screen1" class="screen" style="display:none;">
+        <h1>Create Your Milo</h1>
+        <input type="text" id="q-input" placeholder="Am I the most handsome person?" maxlength="80">
+        <div class="toggle-container">
+            <span>Which answer should win?</span>
+            <div class="toggle">
+                <button id="toggle-yes" class="toggle-btn active">YES</button>
+                <button id="toggle-no" class="toggle-btn">NO</button>
+            </div>
+        </div>
+        <button id="create-btn" class="btn btn-action" style="margin-bottom: 10px;">🎮 Generate Link</button>
+        
+        <!-- Share Section -->
+        <div id="share-section" style="display:none; margin-top: 10px; width: 100%; flex-direction: column; align-items: center;">
+            <h3 style="margin: 10px 0; font-size: 1.5rem; text-shadow: 2px 2px 0 #000;">Game Link Ready!</h3>
+            <input type="text" id="share-link-input" readonly style="width: 90%; font-size: 1rem; text-align: center; margin-bottom: 15px; background: rgba(0,0,0,0.5); color: white; border: 2px solid #fff; box-shadow: none;">
+            <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                <button id="copy-btn" class="btn" style="padding: 10px 15px; min-width: 100px; font-size: 1.2rem; background: var(--pink); color: white;">📋 Copy</button>
+                <button id="share-api-btn" class="btn" style="padding: 10px 15px; min-width: 100px; font-size: 1.2rem; background: var(--blue); color: black; display: none;">📤 Share</button>
+                <button id="play-self-btn" class="btn btn-action" style="padding: 10px 15px; min-width: 100px; font-size: 1.2rem;">🎮 Play</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCREEN 2: PLAYER VIEW PROMPT -->
+    <div id="screen2" class="screen" style="display:none;">
+        <h1 id="question-text"></h1>
+        <button id="answer-btn" class="btn btn-action">💬 Answer This</button>
+    </div>
+
+    <!-- SCREEN 3: THE GAME -->
+    <div id="screen3" style="display:none;">
+        <h1 id="game-question" class="game-question"></h1>
+        
+        <div id="win-btn-container" class="game-btn-container">
+            <button id="win-btn" class="btn btn-win">YES</button>
+        </div>
+        
+        <div id="lose-btn-container" class="game-btn-container">
+            <button id="lose-btn" class="btn btn-lose">NO</button>
+        </div>
+    </div>
+
+    <!-- SCREEN 4: VICTORY MESSAGE -->
+    <div id="screen4" class="screen" style="display:none;">
+        <h1 class="victory-title">I Knew You'd Agree! 😎</h1>
+        <div class="credit">✨ Developed by Arsalan ✨</div>
+        <button id="restart-btn" class="btn btn-action">🔄 Create Your Own Milo</button>
+    </div>
+
+    <script>
+        // Utilities and State
+        const urlParams = new URLSearchParams(window.location.search);
+        const q = urlParams.get('q');
+        const w = urlParams.get('w'); // 'yes' or 'no'
+
+        const screen1 = document.getElementById('screen1');
+        const screen2 = document.getElementById('screen2');
+        const screen3 = document.getElementById('screen3');
+        const screen4 = document.getElementById('screen4');
+
+        let winningAnswer = 'yes'; 
+        let audioCtx;
+
+        // Init Routing
+        if (q && w) {
+            screen2.style.display = 'flex';
+            document.getElementById('question-text').innerText = decodeURIComponent(q);
+            winningAnswer = w.toLowerCase();
+        } else {
+            screen1.style.display = 'flex';
+        }
+
+        // --- SCREEN 1 LOGIC ---
+        let selectedWinner = 'yes';
+        
+        document.getElementById('toggle-yes').addEventListener('click', (e) => {
+            selectedWinner = 'yes';
+            e.target.classList.add('active');
+            document.getElementById('toggle-no').classList.remove('active');
+        });
+        
+        document.getElementById('toggle-no').addEventListener('click', (e) => {
+            selectedWinner = 'no';
+            e.target.classList.add('active');
+            document.getElementById('toggle-yes').classList.remove('active');
+        });
+
+        document.getElementById('create-btn').addEventListener('click', () => {
+            let input = document.getElementById('q-input').value.trim();
+            if (!input) input = document.getElementById('q-input').placeholder;
+            
+            const newUrl = window.location.origin + window.location.pathname + `?q=${encodeURIComponent(input)}&w=${selectedWinner}`;
+            
+            // Show share UI
+            document.getElementById('create-btn').style.display = 'none';
+            const shareSec = document.getElementById('share-section');
+            shareSec.style.display = 'flex';
+            
+            const linkInput = document.getElementById('share-link-input');
+            linkInput.value = newUrl;
+            
+            document.getElementById('copy-btn').onclick = () => {
+                linkInput.select();
+                linkInput.setSelectionRange(0, 99999);
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(newUrl).then(() => {
+                        document.getElementById('copy-btn').innerText = '✅ Copied!';
+                        setTimeout(() => document.getElementById('copy-btn').innerText = '📋 Copy', 2000);
+                    });
+                } else {
+                    document.execCommand('copy');
+                    document.getElementById('copy-btn').innerText = '✅ Copied!';
+                    setTimeout(() => document.getElementById('copy-btn').innerText = '📋 Copy', 2000);
+                }
+            };
+            
+            if (navigator.share) {
+                const shareApiBtn = document.getElementById('share-api-btn');
+                shareApiBtn.style.display = 'block';
+                shareApiBtn.onclick = () => {
+                    navigator.share({
+                        title: 'Milo - The Fun Game',
+                        text: 'I created a fun game for you! Play it now:',
+                        url: newUrl
+                    }).catch(console.error);
+                };
+            }
+            
+            document.getElementById('play-self-btn').onclick = () => {
+                window.location.href = newUrl;
+            };
+        });
+
+        // --- SCREEN 2 LOGIC ---
+        function initGameTransition() {
+            // Init audio context on user gesture
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            screen2.style.display = 'none';
+            startScreen3();
+        }
+
+        document.getElementById('answer-btn').addEventListener('click', initGameTransition);
+        document.getElementById('answer-btn').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            initGameTransition();
+        }, { passive: false });
+
+        // --- SCREEN 3 LOGIC (THE GAME) ---
+        let gameActive = false;
+        let loseScale = 1, winScale = 1;
+        let loseX = 0, loseY = 0, targetLoseX = 0, targetLoseY = 0;
+        let winPosX = 0, winPosY = 0; // win button fixed position
+        let winCurrentScale = 1, loseCurrentScale = 1;
+        let loseTargetScale = 1, winTargetScale = 1;
+        let frustration = 0;
+        let mouseX = -1000, mouseY = -1000;
+        let won = false;
+        // Cached DOM refs for game loop
+        let loseBtnC, winBtnC;
+
+        // Lightweight lerp function — no library needed
+        function lerp(a, b, t) { return a + (b - a) * t; }
+
+        document.addEventListener('mousemove', e => {
+            mouseX = e.clientX; mouseY = e.clientY;
+        });
+        document.addEventListener('touchmove', e => {
+            if (e.touches.length > 0) {
+                mouseX = e.touches[0].clientX;
+                mouseY = e.touches[0].clientY;
+            }
+        }, {passive: true});
+        document.addEventListener('touchstart', e => {
+            if (e.touches.length > 0) {
+                mouseX = e.touches[0].clientX;
+                mouseY = e.touches[0].clientY;
+            }
+        }, {passive: true});
+        document.addEventListener('touchend', e => {
+            if (e.touches.length === 0) { mouseX = -1000; mouseY = -1000; }
+        }, {passive: true});
+
+        function setTransform(el, x, y, scale) {
+            el.style.transform = `translate(calc(${x}px - 50%), calc(${y}px - 50%)) scale(${scale})`;
+        }
+
+        function startScreen3() {
+            screen3.style.display = 'block';
+            document.getElementById('frustration-container').style.display = 'block';
+            document.getElementById('game-question').innerText = decodeURIComponent(q);
+
+            winBtnC = document.getElementById('win-btn-container');
+            loseBtnC = document.getElementById('lose-btn-container');
+            const winBtn = document.getElementById('win-btn');
+            const loseBtn = document.getElementById('lose-btn');
+
+            if (winningAnswer === 'yes') {
+                winBtn.innerText = 'YES'; loseBtn.innerText = 'NO';
+            } else {
+                winBtn.innerText = 'NO'; loseBtn.innerText = 'YES';
+            }
+
+            let cx = window.innerWidth / 2;
+            let cy = window.innerHeight * 0.6;
+
+            if (window.innerWidth < 600) {
+                winPosX = cx; winPosY = cy - 80;
+                loseX = cx; loseY = cy + 80;
+            } else {
+                winPosX = cx - 150; winPosY = cy;
+                loseX = cx + 150; loseY = cy;
+            }
+
+            loseCurrentScale = 1; winCurrentScale = 1;
+            loseTargetScale = 1; winTargetScale = 1;
+            setTransform(winBtnC, winPosX, winPosY, 1);
+            setTransform(loseBtnC, loseX, loseY, 1);
+            targetLoseX = loseX; targetLoseY = loseY;
+
+            loseBtnC.addEventListener('mouseover', () => forceRunAway(true));
+            loseBtnC.addEventListener('touchstart', (e) => {
+                e.preventDefault(); forceRunAway(true);
+            }, { passive: false });
+            winBtnC.addEventListener('click', winGame);
+            winBtnC.addEventListener('touchstart', (e) => {
+                e.preventDefault(); winGame();
+            }, { passive: false });
+
+            gameActive = true;
+            requestAnimationFrame(gameLoop);
+        }
+
+        let lastRunAwayTime = 0;
+        function forceRunAway(ignoreDebounce = false) {
+            if (!gameActive) return;
+            let now = Date.now();
+            let debounceTime = ignoreDebounce ? 50 : 300;
+            if (now - lastRunAwayTime < debounceTime) return;
+            lastRunAwayTime = now;
+
+            targetLoseX = (0.1 + Math.random() * 0.8) * window.innerWidth;
+            targetLoseY = (0.2 + Math.random() * 0.65) * window.innerHeight;
+            increaseFrustration();
+        }
+
+        function increaseFrustration() {
+            frustration = Math.min(100, frustration + 12);
+            document.getElementById('frustration-bar').style.width = frustration + '%';
+            showTaunt(loseX, loseY);
+            if (navigator.vibrate) navigator.vibrate(50);
+            // Slow, teasing shrink — only 0.04 per hit
+            loseTargetScale = Math.max(0.3, loseTargetScale - 0.04);
+            winTargetScale  = Math.min(1.8, winTargetScale  + 0.05);
+        }
+
+        function gameLoop() {
+            if (!gameActive) return;
+
+            // Smooth position lerp (60fps butter)
+            loseX = lerp(loseX, targetLoseX, 0.1);
+            loseY = lerp(loseY, targetLoseY, 0.1);
+
+            // Smooth scale lerp — slow tease effect
+            loseCurrentScale = lerp(loseCurrentScale, loseTargetScale, 0.03);
+            winCurrentScale  = lerp(winCurrentScale,  winTargetScale,  0.03);
+
+            setTransform(loseBtnC, loseX, loseY, loseCurrentScale);
+            setTransform(winBtnC, winPosX, winPosY, winCurrentScale);
+
+            // Proximity check
+            let dist = Math.hypot(mouseX - loseX, mouseY - loseY);
+            let threshold = 120 * loseCurrentScale + (window.innerWidth < 600 ? 60 : 40);
+            if (dist < threshold) forceRunAway();
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function showTaunt(x, y) {
+            const taunts = ["Missed!", "Too Slow!", "Nope!", "Try Again!", "Haha!", "Almost!", "Sike!"];
+            const t = document.createElement('div');
+            t.className = 'taunt';
+            t.innerText = taunts[Math.floor(Math.random() * taunts.length)];
+            t.style.left = x + 'px';
+            t.style.top = y + 'px';
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), 1000);
+        }
+
+        // --- SCREEN 4 LOGIC (VICTORY) ---
+        function winGame() {
+            if (won || !gameActive) return;
+            won = true;
+            gameActive = false;
+            
+            document.getElementById('frustration-container').style.display = 'none';
+            screen3.style.display = 'none';
+            screen4.style.display = 'flex';
+            
+            playVictorySound();
+            confettiActive = true;
+            initConfetti();
+            renderConfetti();
+        }
+
+        function restartApp() {
+            window.location.href = window.location.origin + window.location.pathname;
+        }
+
+        document.getElementById('restart-btn').addEventListener('click', restartApp);
+        document.getElementById('restart-btn').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            restartApp();
+        }, { passive: false });
+
+        // --- AUDIO SYSTEM ---
+        function playVictorySound() {
+            if (!audioCtx) return;
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            
+            const playNote = (freq, startTime, duration) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, startTime);
+                
+                gain.gain.setValueAtTime(0, startTime);
+                gain.gain.linearRampToValueAtTime(0.3, startTime + 0.05);
+                gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+                
+                osc.start(startTime);
+                osc.stop(startTime + duration);
+            };
+            
+            const now = audioCtx.currentTime;
+            playNote(523.25, now, 0.2); // C5
+            playNote(659.25, now + 0.1, 0.2); // E5
+            playNote(783.99, now + 0.2, 0.4); // G5
+            playNote(1046.50, now + 0.3, 0.6); // C6
+        }
+
+        // --- CONFETTI SYSTEM ---
+        let confettiActive = false;
+        let canvas, ctx;
+        let confettis = [];
+
+        function initConfetti() {
+            canvas = document.createElement('canvas');
+            canvas.id = 'confetti-canvas';
+            document.body.appendChild(canvas);
+            ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            canvas.style.position = 'fixed';
+            canvas.style.top = '0';
+            canvas.style.left = '0';
+            canvas.style.pointerEvents = 'none';
+            canvas.style.zIndex = '9999';
+
+            // 60 particles — smooth on all devices
+            for(let i=0; i<60; i++) {
+                confettis.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    w: Math.random() * 10 + 5,
+                    h: Math.random() * 10 + 5,
+                    c: ['#FF0080', '#00FFFF', '#32CD32', '#FFD700', '#FFFFFF'][Math.floor(Math.random()*5)],
+                    v: Math.random() * 4 + 2,
+                    a: Math.random() * 360,
+                    s: Math.random() * 0.08 + 0.02
+                });
+            }
+        }
+
+        function renderConfetti() {
+            if(!confettiActive) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            confettis.forEach(c => {
+                c.y += c.v;
+                c.a += c.s;
+                if(c.y > canvas.height) {
+                    c.y = -20;
+                    c.x = Math.random() * canvas.width;
+                }
+                ctx.save();
+                ctx.translate(c.x, c.y);
+                ctx.rotate(c.a);
+                ctx.fillStyle = c.c;
+                ctx.fillRect(-c.w/2, -c.h/2, c.w, c.h);
+                ctx.restore();
+            });
+            requestAnimationFrame(renderConfetti);
+        }
+    </script>
+</body>
+</html>
