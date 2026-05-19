@@ -1,700 +1,1162 @@
 <!DOCTYPE html>
-<html lang="en" style="color-scheme:light!important;background:#FF0080!important">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="color-scheme" content="only light">
-    <meta name="theme-color" content="#FF0080">
+    <meta name="supported-color-schemes" content="light">
+    <meta name="theme-color" content="#2ECC71">
+    <meta name="description" content="Milo — a playful prank game. Create a question, pick the winning answer, share the link, watch friends chase it.">
+    <meta property="og:title" content="Milo — The Chase Game">
+    <meta property="og:description" content="Pick the right answer. If you can catch it.">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
     <title>Milo</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --pink: #FF0080;
-            --blue: #00FFFF;
             --green: #32CD32;
+            --green-deep: #16A085;
+            --pink: #FF1493;
+            --pink-soft: #ff5fb8;
             --gold: #FFD700;
+            --dark: #000000;
+            --bg-1: #2ECC71;
+            --bg-2: #1ABC9C;
+            --bg-3: #16A085;
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+            --safe-left: env(safe-area-inset-left, 0px);
+            --safe-right: env(safe-area-inset-right, 0px);
         }
 
-        body, html {
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        html, body {
             width: 100%;
             height: 100%;
+            height: 100dvh;
             overflow: hidden;
-            font-family: 'Fredoka One', cursive, sans-serif;
-            background: linear-gradient(-45deg, #FF0080, #00FFFF, #32CD32, #FF0080) !important;
-            background-size: 400% 400% !important;
-            animation: gradientBG 15s ease infinite;
-            color: #ffffff !important;
+            font-family: 'Fredoka One', 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg-1);
+            color: #fff;
             display: flex;
             justify-content: center;
             align-items: center;
-            touch-action: none;
-            -webkit-text-size-adjust: 100%;
+            color-scheme: light;
+            forced-color-adjust: none;
+            overscroll-behavior: none;
         }
 
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+        /* Mesh gradient — 4 radial blobs drifting */
+        .bg-mesh {
+            position: fixed;
+            inset: 0;
+            z-index: -2;
+            background:
+                radial-gradient(circle at 20% 20%, #3df58a 0%, transparent 45%),
+                radial-gradient(circle at 80% 30%, #1ABC9C 0%, transparent 50%),
+                radial-gradient(circle at 70% 80%, #16A085 0%, transparent 55%),
+                radial-gradient(circle at 25% 75%, #2ECC71 0%, transparent 50%),
+                linear-gradient(180deg, #2ECC71, #16A085);
+            background-size: 200% 200%;
+            animation: meshDrift 22s ease-in-out infinite alternate;
+            will-change: background-position;
+        }
+        @keyframes meshDrift {
+            0%   { background-position: 0% 0%, 100% 0%, 100% 100%, 0% 100%, 0 0; }
+            100% { background-position: 20% 30%, 70% 20%, 60% 90%, 30% 70%, 0 0; }
         }
 
+        /* Dot pattern w/ pointer-parallax via CSS vars */
+        .bg-dots {
+            position: fixed;
+            inset: -20px;
+            z-index: -1;
+            background-image: radial-gradient(circle, rgba(0,0,0,0.10) 1.5px, transparent 1.5px);
+            background-size: 26px 26px;
+            transform: translate3d(var(--px, 0px), var(--py, 0px), 0);
+            transition: transform 0.4s cubic-bezier(.2,.8,.2,1);
+            pointer-events: none;
+        }
+
+        /* Logo */
         #logo {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            font-size: 1.8rem;
+            position: fixed;
+            top: calc(18px + var(--safe-top));
+            left: calc(18px + var(--safe-left));
+            font-size: 1.6rem;
             font-weight: bold;
             color: #fff;
-            text-shadow: 3px 3px 0 #000;
             z-index: 100;
             user-select: none;
+            pointer-events: none;
+            text-shadow: 2px 2px 0 #000, 3px 3px 0 rgba(0,0,0,0.3);
+            letter-spacing: 1px;
         }
 
+        /* Screens */
         .screen {
-            width: 90%;
-            max-width: 600px;
-            max-height: 90vh;
+            width: 92%;
+            max-width: 440px;
             text-align: center;
-            display: flex;
+            display: none;
             flex-direction: column;
             align-items: center;
-            background: rgba(0,0,0,0.25);
-            padding: 40px 20px;
-            border-radius: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            border: 4px solid rgba(255,255,255,0.5);
             z-index: 10;
             position: relative;
+            animation: fadeIn 0.5s cubic-bezier(.2,.8,.2,1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(16px) scale(0.98); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         h1 {
-            font-size: 2.5rem;
-            color: #ffffff !important;
-            -webkit-text-fill-color: #ffffff !important;
-            text-shadow: 4px 4px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
-            margin-bottom: 30px;
+            font-size: 2.3rem;
+            color: #fff;
+            text-shadow: 3px 3px 0 #000, 4px 4px 0 rgba(0,0,0,0.2);
+            margin-bottom: 32px;
             line-height: 1.2;
+            letter-spacing: 1px;
         }
 
+        h2 {
+            font-size: 1.55rem;
+            color: #fff;
+            text-shadow: 2px 2px 0 #000;
+            margin-bottom: 18px;
+        }
+
+        /* Glass card around screen 1 form */
+        .glass {
+            padding: 28px 22px 26px;
+            border-radius: 28px;
+            background: rgba(255,255,255,0.10);
+            backdrop-filter: blur(14px) saturate(140%);
+            -webkit-backdrop-filter: blur(14px) saturate(140%);
+            border: 1.5px solid rgba(255,255,255,0.25);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.25);
+            width: 100%;
+        }
+
+        /* Input field */
         input[type="text"] {
-            width: 80%;
-            padding: 15px;
-            font-family: 'Fredoka One', cursive;
-            font-size: 1.2rem;
-            border: 4px solid #000;
-            border-radius: 15px;
-            margin-bottom: 20px;
+            width: 100%;
+            padding: 15px 18px;
+            font-family: 'Fredoka One', 'Inter', sans-serif;
+            font-size: 1.1rem;
+            border: 3px solid #000;
+            border-radius: 18px;
+            margin-bottom: 22px;
             outline: none;
-            background: #ffffff !important;
-            color: #000000 !important;
-            -webkit-text-fill-color: #000000 !important;
-            box-shadow: inset 3px 3px 6px rgba(0,0,0,0.2);
+            background: #fff;
+            color: #000;
+            box-shadow: 3px 5px 0 #000;
+            transition: transform 0.18s cubic-bezier(.2,.8,.2,1), box-shadow 0.18s;
         }
 
+        input[type="text"]:focus {
+            transform: translateY(-2px);
+            box-shadow: 3px 7px 0 #000;
+        }
+        input[type="text"]:focus-visible {
+            outline: 3px solid var(--gold);
+            outline-offset: 3px;
+        }
+
+        /* Toggle section */
         .toggle-container {
-            margin-bottom: 30px;
-            font-size: 1.2rem;
+            margin-bottom: 26px;
+            font-size: 1.1rem;
             text-shadow: 2px 2px 0 #000;
         }
 
         .toggle {
             display: flex;
             justify-content: center;
-            margin-top: 10px;
+            margin-top: 12px;
             background: #000;
-            border-radius: 20px;
-            padding: 5px;
+            border-radius: 50px;
+            padding: 4px;
+            gap: 4px;
+            position: relative;
         }
 
         .toggle-btn {
             flex: 1;
-            padding: 10px 20px;
-            font-family: 'Fredoka One', cursive;
-            font-size: 1.2rem;
+            padding: 11px 28px;
+            font-family: 'Fredoka One', 'Inter', sans-serif;
+            font-size: 1.1rem;
             border: none;
             background: transparent;
             color: #fff;
             cursor: pointer;
-            border-radius: 15px;
-            transition: background 0.3s, transform 0.1s;
+            border-radius: 50px;
+            transition: color 0.2s ease;
+            letter-spacing: 1px;
+            position: relative;
+            z-index: 1;
         }
 
         .toggle-btn.active {
-            background: var(--pink);
             color: #fff;
-            box-shadow: 0 0 10px rgba(255,0,128,0.5);
-            transform: scale(1.05);
+        }
+        .toggle-thumb {
+            position: absolute;
+            top: 4px; left: 4px;
+            width: calc(50% - 4px);
+            height: calc(100% - 8px);
+            background: var(--pink);
+            border-radius: 50px;
+            box-shadow: 0 0 18px rgba(255,20,147,0.5);
+            transition: transform 0.32s cubic-bezier(.34,1.56,.64,1);
+            z-index: 0;
         }
 
+        /* Main action button */
         .btn {
-            font-family: 'Fredoka One', cursive;
-            font-size: 1.5rem;
-            padding: 15px 30px;
-            border: 4px solid #000;
-            border-radius: 20px;
+            font-family: 'Fredoka One', 'Inter', sans-serif;
+            font-size: 1.3rem;
+            padding: 14px 36px;
+            border: 3px solid #000;
+            border-radius: 50px;
             cursor: pointer;
-            box-shadow: 4px 8px 0px #000;
-            transition: transform 0.1s, box-shadow 0.1s;
+            box-shadow: 4px 6px 0 #000;
+            transition: transform 0.12s cubic-bezier(.34,1.56,.64,1), box-shadow 0.12s, background 0.2s;
             text-transform: uppercase;
             outline: none;
             user-select: none;
-            -webkit-tap-highlight-color: transparent;
-            min-width: 150px;
-            min-height: 50px;
+            min-width: 180px;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
         }
-
+        .btn:hover { transform: translateY(-2px); box-shadow: 4px 8px 0 #000; }
         .btn:active {
             transform: translateY(4px) !important;
-            box-shadow: 4px 4px 0px #000 !important;
+            box-shadow: 2px 2px 0 #000 !important;
         }
+        .btn:focus-visible { outline: 3px solid var(--gold); outline-offset: 4px; }
 
-        .btn-action {
-            background: var(--gold);
-            color: #000;
-        }
-        .btn-action:hover {
-            background: #FFEA00;
-        }
+        .btn-action { background: var(--gold); color: #000; }
+        .btn-action:hover { background: #FFE55C; }
 
-        /* Screen 3 specialized styles */
+        /* Game Screen */
         #screen3 {
             width: 100%;
             height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
+            position: fixed;
+            top: 0; left: 0;
             z-index: 10;
             overflow: hidden;
+            display: none;
         }
 
         .game-question {
             position: absolute;
-            top: 15%;
+            top: calc(16% + var(--safe-top));
             left: 50%;
             transform: translateX(-50%);
             width: 90%;
-            font-size: 2.5rem;
+            font-size: 2rem;
             text-align: center;
             z-index: 5;
             pointer-events: none;
+            color: #fff;
+            text-shadow: 3px 3px 0 #000, 4px 4px 0 rgba(0,0,0,0.2);
+            line-height: 1.3;
         }
 
         .game-btn-container {
             position: absolute;
-            left: 0;
-            top: 0;
-            will-change: transform;
             z-index: 20;
+            will-change: transform;
         }
 
-        .btn-win {
-            background: var(--green);
-            color: white;
-            animation: pulseWin 2s infinite;
+        /* Game buttons */
+        .btn-game {
+            font-family: 'Fredoka One', 'Inter', sans-serif;
+            font-size: 1.4rem;
+            padding: 18px 50px;
+            border: 3px solid #000;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 4px 8px 0 #000;
+            transition: filter 0.15s ease;
+            text-transform: uppercase;
+            outline: none;
+            user-select: none;
+            min-width: 160px;
+            letter-spacing: 2px;
+            color: #fff;
+            will-change: transform;
+            position: relative;
+        }
+        .btn-game:focus-visible { outline: 3px solid var(--gold); outline-offset: 4px; }
+        .btn-yes { background: var(--green); }
+        .btn-no  { background: var(--pink); }
+
+        /* Halo around winning button — intensifies w/ frustration */
+        #win-btn-container::before {
+            content: '';
+            position: absolute;
+            inset: -12px;
+            border-radius: 50px;
+            background: radial-gradient(ellipse at center, rgba(255,215,0, calc(0.25 + var(--halo, 0) * 0.6)) 0%, transparent 70%);
+            filter: blur(8px);
+            z-index: -1;
+            pointer-events: none;
+            transition: opacity 0.2s;
         }
 
-        @keyframes pulseWin {
-            0% { box-shadow: 0 0 0 0 rgba(50, 205, 50, 0.7), 4px 8px 0px #000; }
-            70% { box-shadow: 0 0 0 20px rgba(50, 205, 50, 0), 4px 8px 0px #000; }
-            100% { box-shadow: 0 0 0 0 rgba(50, 205, 50, 0), 4px 8px 0px #000; }
-        }
-
-        .btn-lose {
-            background: #FF0080 !important;
-            color: #ffffff !important;
-            -webkit-text-fill-color: #ffffff !important;
-        }
-        .btn-win {
-            background: #32CD32 !important;
-            color: #ffffff !important;
-            -webkit-text-fill-color: #ffffff !important;
-        }
-        .btn-action {
-            background: #FFD700 !important;
-            color: #000000 !important;
-            -webkit-text-fill-color: #000000 !important;
-        }
-
-        /* Frustration Meter */
+        /* Frustration bar */
         #frustration-container {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 15px;
-            background: rgba(0,0,0,0.5);
+            top: var(--safe-top); left: 0;
+            width: 100%; height: 10px;
+            background: rgba(0,0,0,0.3);
             display: none;
             z-index: 200;
-            border-bottom: 3px solid #000;
+            overflow: hidden;
         }
 
         #frustration-bar {
-            width: 0%;
-            height: 100%;
-            background: linear-gradient(90deg, var(--green), #FFEA00, var(--pink));
+            width: 0%; height: 100%;
+            background: linear-gradient(90deg, var(--green), var(--gold), var(--pink));
             background-size: 200% 100%;
-            transition: width 0.3s ease-out;
-            box-shadow: 0 0 10px rgba(255,0,128,0.8);
+            transition: width 0.18s cubic-bezier(.2,.8,.2,1);
+            box-shadow: 0 0 10px rgba(255,20,147,0.5);
+            position: relative;
         }
+        #frustration-bar::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent);
+            transform: translateX(-100%);
+            animation: shimmer 1.6s linear infinite;
+        }
+        @keyframes shimmer { to { transform: translateX(100%); } }
 
-        /* Taunt Messages */
+        /* Taunt messages */
         .taunt {
             position: absolute;
-            color: white;
-            font-size: 1.8rem;
+            color: #fff;
+            font-size: 1.5rem;
             font-weight: bold;
-            text-shadow: 3px 3px 0 #000;
+            text-shadow: 2px 2px 0 #000, 0 0 12px rgba(0,0,0,0.4);
             pointer-events: none;
-            animation: floatUp 1s ease-out forwards;
+            animation: tauntUp 0.75s cubic-bezier(.2,.8,.2,1) forwards;
             z-index: 50;
+            white-space: nowrap;
+            letter-spacing: 1px;
             transform: translate(-50%, -50%);
         }
 
-        @keyframes floatUp {
-            0% { opacity: 1; margin-top: 0; scale: 1; }
-            100% { opacity: 0; margin-top: -80px; scale: 1.5; }
+        @keyframes tauntUp {
+            0%   { opacity: 0; transform: translate(-50%, -30%) scale(0.7) rotate(-6deg); }
+            20%  { opacity: 1; transform: translate(-50%, -55%) scale(1.15) rotate(2deg); }
+            100% { opacity: 0; transform: translate(-50%, -150%) scale(1) rotate(-3deg); }
         }
 
-        /* Credit Styling */
-        .credit {
+        /* Screen-shake — applied to #screen3 */
+        .shake-1 { animation: shake1 0.18s ease-out; }
+        .shake-2 { animation: shake2 0.22s ease-out; }
+        .shake-3 { animation: shake3 0.26s ease-out; }
+        @keyframes shake1 { 50% { transform: translate(2px, -1px); } }
+        @keyframes shake2 { 25% { transform: translate(-4px, 2px); } 75% { transform: translate(3px, -2px); } }
+        @keyframes shake3 { 20% { transform: translate(-7px, 3px); } 50% { transform: translate(6px, -4px); } 80% { transform: translate(-3px, 2px); } }
+
+        /* Particle canvas behind buttons */
+        #fx-canvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 6;
+        }
+
+        /* Victory screen */
+        .victory-title {
             font-size: 2.2rem;
-            margin: 30px 0;
-            text-align: center;
-            background: linear-gradient(90deg, #FFD700, #FFA500, #FFEA00, #FFD700);
-            background-size: 300% auto;
-            color: #FFD700; /* Fallback */
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: goldShine 3s linear infinite;
-            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.4));
+            margin-bottom: 15px;
         }
 
-        @keyframes goldShine {
-            0% { background-position: 0% center; }
-            100% { background-position: 300% center; }
+        .credit {
+            font-size: 1.4rem;
+            margin: 25px 0;
+            color: var(--gold);
+            text-shadow: 2px 2px 0 #000;
+            letter-spacing: 2px;
+        }
+
+        /* Share section */
+        #share-section {
+            margin-top: 18px;
+            width: 100%;
+            flex-direction: column;
+            align-items: center;
+            animation: fadeIn 0.35s cubic-bezier(.2,.8,.2,1);
+        }
+
+        #share-link-input {
+            width: 100%;
+            font-size: 0.95rem;
+            text-align: center;
+            margin-bottom: 15px;
+            padding: 12px;
+            background: rgba(0,0,0,0.4);
+            color: #fff;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 14px;
+            font-family: 'Inter', system-ui, sans-serif;
+            word-break: break-all;
+            box-shadow: none;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-small {
+            padding: 10px 20px;
+            min-width: auto;
+            font-size: 1.1rem;
+        }
+
+        .btn-pink { background: var(--pink); color: #fff; }
+        .btn-blue { background: #3498DB; color: #fff; }
+
+        /* Confetti canvas */
+        #confetti-canvas {
+            position: fixed;
+            inset: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* SR-only */
+        .sr-only {
+            position: absolute;
+            width: 1px; height: 1px;
+            padding: 0; margin: -1px;
+            overflow: hidden;
+            clip: rect(0,0,0,0);
+            white-space: nowrap;
+            border: 0;
         }
 
         @media (max-width: 600px) {
-            h1 { font-size: 2rem; }
-            .btn { font-size: 1.2rem; padding: 12px 24px; }
-            .game-question { font-size: 2rem; top: 10%; }
-            .credit { font-size: 1.6rem; }
+            h1 { font-size: 1.85rem; margin-bottom: 24px; }
+            .game-question { font-size: 1.6rem; top: calc(13% + var(--safe-top)); }
+            .btn { font-size: 1.2rem; padding: 13px 28px; min-width: 160px; }
+            .btn-game { font-size: 1.2rem; padding: 16px 40px; }
+            #logo { font-size: 1.4rem; }
+            .btn-row { gap: 8px; }
+            .btn-small { padding: 9px 16px; font-size: 1rem; }
+            .glass { padding: 22px 16px; border-radius: 22px; }
+            .victory-title { font-size: 1.85rem; }
+            .credit { font-size: 1.2rem; }
+        }
+
+        @media (max-height: 640px) {
+            h1 { margin-bottom: 18px; }
+            .toggle-container { margin-bottom: 18px; }
+            .game-question { font-size: 1.4rem; top: calc(10% + var(--safe-top)); }
+        }
+
+        /* Honour reduced motion — kill drifts/shake/parallax/confetti spam */
+        @media (prefers-reduced-motion: reduce) {
+            .bg-mesh, .bg-dots, #frustration-bar::after { animation: none !important; }
+            .shake-1, .shake-2, .shake-3 { animation: none !important; }
+            .screen { animation: none !important; }
+            * { transition-duration: 0.01ms !important; }
         }
     </style>
 </head>
 <body>
+    <div class="bg-mesh" aria-hidden="true"></div>
+    <div class="bg-dots" aria-hidden="true"></div>
+    <div id="logo" aria-hidden="true">🎮 Milo</div>
 
-    <div id="logo">🎮 Milo</div>
-
-    <div id="frustration-container">
+    <div id="frustration-container" aria-hidden="true">
         <div id="frustration-bar"></div>
     </div>
 
-    <!-- SCREEN 1: QUESTION CREATION -->
-    <div id="screen1" class="screen" style="display:none;">
+    <canvas id="fx-canvas" aria-hidden="true"></canvas>
+
+    <!-- live region for screen-reader -->
+    <div id="sr-live" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+    <main>
+    <!-- SCREEN 1 -->
+    <section id="screen1" class="screen" aria-label="Create your game">
         <h1>Create Your Milo</h1>
-        <input type="text" id="q-input" placeholder="Am I the most handsome person?" maxlength="80">
-        <div class="toggle-container">
-            <span>Which answer should win?</span>
-            <div class="toggle">
-                <button id="toggle-yes" class="toggle-btn active">YES</button>
-                <button id="toggle-no" class="toggle-btn">NO</button>
+        <div class="glass">
+            <label for="q-input" class="sr-only">Your question</label>
+            <input type="text" id="q-input" placeholder="Am I the most handsome person?" maxlength="80" autocomplete="off" inputmode="text" enterkeyhint="done">
+            <div class="toggle-container">
+                <span id="toggle-label">Which answer should win?</span>
+                <div class="toggle" role="radiogroup" aria-labelledby="toggle-label">
+                    <span class="toggle-thumb" aria-hidden="true"></span>
+                    <button id="toggle-yes" class="toggle-btn active" role="radio" aria-checked="true">YES</button>
+                    <button id="toggle-no" class="toggle-btn" role="radio" aria-checked="false">NO</button>
+                </div>
             </div>
-        </div>
-        <button id="create-btn" class="btn btn-action" style="margin-bottom: 10px;">🎮 Generate Link</button>
-        
-        <!-- Share Section -->
-        <div id="share-section" style="display:none; margin-top: 10px; width: 100%; flex-direction: column; align-items: center;">
-            <h3 style="margin: 10px 0; font-size: 1.5rem; text-shadow: 2px 2px 0 #000;">Game Link Ready!</h3>
-            <input type="text" id="share-link-input" readonly style="width: 90%; font-size: 1rem; text-align: center; margin-bottom: 15px; background: rgba(0,0,0,0.5); color: white; border: 2px solid #fff; box-shadow: none;">
-            <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-                <button id="copy-btn" class="btn" style="padding: 10px 15px; min-width: 100px; font-size: 1.2rem; background: var(--pink); color: white;">📋 Copy</button>
-                <button id="share-api-btn" class="btn" style="padding: 10px 15px; min-width: 100px; font-size: 1.2rem; background: var(--blue); color: black; display: none;">📤 Share</button>
-                <button id="play-self-btn" class="btn btn-action" style="padding: 10px 15px; min-width: 100px; font-size: 1.2rem;">🎮 Play</button>
-            </div>
-        </div>
-    </div>
+            <button id="create-btn" class="btn btn-action" aria-label="Generate shareable link">🚀 Generate Link</button>
 
-    <!-- SCREEN 2: PLAYER VIEW PROMPT -->
-    <div id="screen2" class="screen" style="display:none;">
+            <div id="share-section" style="display:none;" aria-live="polite">
+                <h2>Game Link Ready!</h2>
+                <label for="share-link-input" class="sr-only">Shareable link</label>
+                <input type="text" id="share-link-input" readonly aria-readonly="true">
+                <div class="btn-row">
+                    <button id="copy-btn" class="btn btn-small btn-pink" aria-label="Copy link to clipboard">📋 Copy</button>
+                    <button id="share-api-btn" class="btn btn-small btn-blue" style="display:none;" aria-label="Share link">📤 Share</button>
+                    <button id="play-self-btn" class="btn btn-small btn-action" aria-label="Play this game now">🚀 Play</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SCREEN 2 -->
+    <section id="screen2" class="screen" aria-label="Question prompt">
         <h1 id="question-text"></h1>
-        <button id="answer-btn" class="btn btn-action">💬 Answer This</button>
-    </div>
+        <button id="answer-btn" class="btn btn-action">✨ Answer This</button>
+    </section>
 
-    <!-- SCREEN 3: THE GAME -->
-    <div id="screen3" style="display:none;">
+    <!-- SCREEN 3 -->
+    <section id="screen3" aria-label="The chase">
         <h1 id="game-question" class="game-question"></h1>
-        
         <div id="win-btn-container" class="game-btn-container">
-            <button id="win-btn" class="btn btn-win">YES</button>
+            <button id="win-btn" class="btn-game btn-yes" aria-label="Winning answer">YES</button>
         </div>
-        
         <div id="lose-btn-container" class="game-btn-container">
-            <button id="lose-btn" class="btn btn-lose">NO</button>
+            <button id="lose-btn" class="btn-game btn-no" aria-label="Losing answer">NO</button>
         </div>
-    </div>
+    </section>
 
-    <!-- SCREEN 4: VICTORY MESSAGE -->
-    <div id="screen4" class="screen" style="display:none;">
-        <h1 class="victory-title">I Knew You'd Agree! 😎</h1>
-        <div class="credit">✨ Developed by Arsalan ✨</div>
-        <button id="restart-btn" class="btn btn-action">🔄 Create Your Own Milo</button>
-    </div>
+    <!-- SCREEN 4 -->
+    <section id="screen4" class="screen" aria-label="You won">
+        <h1 class="victory-title">I Knew You'd Agree! 🎉</h1>
+        <div class="credit">⚡ Developed by Arsalan ⚡</div>
+        <button id="restart-btn" class="btn btn-action">🔄 Create Your Own</button>
+    </section>
+    </main>
 
     <script>
-        // Utilities and State
-        const urlParams = new URLSearchParams(window.location.search);
-        const q = urlParams.get('q');
-        const w = urlParams.get('w'); // 'yes' or 'no'
+        'use strict';
 
-        const screen1 = document.getElementById('screen1');
-        const screen2 = document.getElementById('screen2');
-        const screen3 = document.getElementById('screen3');
-        const screen4 = document.getElementById('screen4');
+        // ===== ANDROID FORCED-DARK FIX (lightweight) =====
+        (function() {
+            const style = document.createElement('style');
+            style.textContent = `@media (prefers-color-scheme: dark) {
+                html, body { background: #2ECC71 !important; }
+                input { background: #fff !important; color: #000 !important; }
+            }`;
+            document.head.appendChild(style);
+        })();
 
-        let winningAnswer = 'yes'; 
-        let audioCtx;
+        const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-        // Init Routing
+        // ===== DOM CACHE =====
+        const $ = id => document.getElementById(id);
+        const screen1 = $('screen1'), screen2 = $('screen2'), screen3 = $('screen3'), screen4 = $('screen4');
+        const qInput = $('q-input'), shareSection = $('share-section'), shareLinkInput = $('share-link-input');
+        const toggleYes = $('toggle-yes'), toggleNo = $('toggle-no'), toggleThumb = document.querySelector('.toggle-thumb');
+        const createBtn = $('create-btn'), copyBtn = $('copy-btn'), shareApiBtn = $('share-api-btn');
+        const playSelfBtn = $('play-self-btn'), answerBtn = $('answer-btn'), restartBtn = $('restart-btn');
+        const questionText = $('question-text'), gameQuestion = $('game-question');
+        const winBtn = $('win-btn'), loseBtn = $('lose-btn');
+        const winBtnC = $('win-btn-container'), loseBtnC = $('lose-btn-container');
+        const frustrationContainer = $('frustration-container'), frustrationBar = $('frustration-bar');
+        const srLive = $('sr-live');
+        const bgDots = document.querySelector('.bg-dots');
+        const fxCanvas = $('fx-canvas');
+        const fxCtx = fxCanvas.getContext('2d');
+
+        // ===== STATE =====
+        const urlParams = new URLSearchParams(location.search);
+        const q = urlParams.get('q'), w = urlParams.get('w');
+        let winningAnswer = 'yes', selectedWinner = 'yes';
+        let audioCtx = null, gameActive = false, won = false;
+        let mouseX = -9999, mouseY = -9999;
+        // spring state: pos, vel, target
+        let loseX = 0, loseY = 0, lvx = 0, lvy = 0, targetLoseX = 0, targetLoseY = 0;
+        let winPosX = 0, winPosY = 0;
+        let loseScale = 1, winScale = 1;
+        let loseTargetScale = 1, winTargetScale = 1;
+        let frustration = 0, lastRunTime = 0;
+        let winW = innerWidth, winH = innerHeight;
+        let tauntPool = [], tauntIdx = 0;
+        let confettiActive = false, confettiCanvas, confettiCtx, confettis = [];
+        let rafId = null;
+        let particles = [];
+        let shakeFrames = 0, shakeMag = 0;
+
+        // ===== CANVAS RESIZE =====
+        function sizeFxCanvas() {
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            fxCanvas.width = winW * dpr;
+            fxCanvas.height = winH * dpr;
+            fxCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
+        sizeFxCanvas();
+
+        // ===== INIT =====
         if (q && w) {
-            screen2.style.display = 'flex';
-            document.getElementById('question-text').innerText = decodeURIComponent(q);
             winningAnswer = w.toLowerCase();
+            questionText.textContent = decodeURIComponent(q);
+            screen2.style.display = 'flex';
         } else {
             screen1.style.display = 'flex';
         }
 
-        // --- SCREEN 1 LOGIC ---
-        let selectedWinner = 'yes';
-        
-        document.getElementById('toggle-yes').addEventListener('click', (e) => {
-            selectedWinner = 'yes';
-            e.target.classList.add('active');
-            document.getElementById('toggle-no').classList.remove('active');
-        });
-        
-        document.getElementById('toggle-no').addEventListener('click', (e) => {
-            selectedWinner = 'no';
-            e.target.classList.add('active');
-            document.getElementById('toggle-yes').classList.remove('active');
-        });
+        // ===== SCREEN 1 — TOGGLE =====
+        function setToggle(which) {
+            selectedWinner = which;
+            const yesActive = which === 'yes';
+            toggleYes.classList.toggle('active', yesActive);
+            toggleNo.classList.toggle('active', !yesActive);
+            toggleYes.setAttribute('aria-checked', yesActive ? 'true' : 'false');
+            toggleNo.setAttribute('aria-checked', yesActive ? 'false' : 'true');
+            toggleThumb.style.transform = yesActive ? 'translateX(0)' : 'translateX(100%)';
+        }
+        toggleYes.addEventListener('click', () => setToggle('yes'));
+        toggleNo.addEventListener('click', () => setToggle('no'));
 
-        document.getElementById('create-btn').addEventListener('click', () => {
-            let input = document.getElementById('q-input').value.trim();
-            if (!input) input = document.getElementById('q-input').placeholder;
-            
-            const newUrl = window.location.origin + window.location.pathname + `?q=${encodeURIComponent(input)}&w=${selectedWinner}`;
-            
-            // Show share UI
-            document.getElementById('create-btn').style.display = 'none';
-            const shareSec = document.getElementById('share-section');
-            shareSec.style.display = 'flex';
-            
-            const linkInput = document.getElementById('share-link-input');
-            linkInput.value = newUrl;
-            
-            document.getElementById('copy-btn').onclick = () => {
-                linkInput.select();
-                linkInput.setSelectionRange(0, 99999);
-                if (navigator.clipboard) {
-                    navigator.clipboard.writeText(newUrl).then(() => {
-                        document.getElementById('copy-btn').innerText = '✅ Copied!';
-                        setTimeout(() => document.getElementById('copy-btn').innerText = '📋 Copy', 2000);
-                    });
-                } else {
-                    document.execCommand('copy');
-                    document.getElementById('copy-btn').innerText = '✅ Copied!';
-                    setTimeout(() => document.getElementById('copy-btn').innerText = '📋 Copy', 2000);
-                }
-            };
-            
-            if (navigator.share) {
-                const shareApiBtn = document.getElementById('share-api-btn');
-                shareApiBtn.style.display = 'block';
-                shareApiBtn.onclick = () => {
-                    navigator.share({
-                        title: 'Milo - The Fun Game',
-                        text: 'I created a fun game for you! Play it now:',
-                        url: newUrl
-                    }).catch(console.error);
+        createBtn.addEventListener('click', () => {
+            let input = qInput.value.trim();
+            if (!input) input = qInput.placeholder;
+            const newUrl = location.origin + location.pathname + `?q=${encodeURIComponent(input)}&w=${selectedWinner}`;
+
+            createBtn.style.display = 'none';
+            shareSection.style.display = 'flex';
+            shareLinkInput.value = newUrl;
+
+            copyBtn.onclick = () => {
+                shareLinkInput.select();
+                shareLinkInput.setSelectionRange(0, 99999);
+                const done = () => {
+                    copyBtn.textContent = '✅ Copied!';
+                    srLive.textContent = 'Link copied to clipboard';
+                    setTimeout(() => copyBtn.textContent = '📋 Copy', 1500);
                 };
-            }
-            
-            document.getElementById('play-self-btn').onclick = () => {
-                window.location.href = newUrl;
+                if (navigator.clipboard) navigator.clipboard.writeText(newUrl).then(done).catch(() => { document.execCommand('copy'); done(); });
+                else { document.execCommand('copy'); done(); }
             };
+
+            if (navigator.share) {
+                shareApiBtn.style.display = 'inline-block';
+                shareApiBtn.onclick = () => navigator.share({
+                    title: 'Milo - The Fun Game',
+                    text: 'I created a fun game for you! Play it now:',
+                    url: newUrl
+                }).catch(() => {});
+            }
+            playSelfBtn.onclick = () => location.href = newUrl;
         });
 
-        // --- SCREEN 2 LOGIC ---
-        function initGameTransition() {
-            // Init audio context on user gesture
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
+        // ===== SCREEN 2 =====
+        function initAudio() {
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+            } catch (e) { /* audio unavailable */ }
+        }
+
+        function toScreen3() {
+            initAudio();
             screen2.style.display = 'none';
-            startScreen3();
+            startGame();
         }
 
-        document.getElementById('answer-btn').addEventListener('click', initGameTransition);
-        document.getElementById('answer-btn').addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            initGameTransition();
-        }, { passive: false });
+        answerBtn.addEventListener('click', toScreen3);
+        answerBtn.addEventListener('touchstart', e => { e.preventDefault(); toScreen3(); }, { passive: false });
 
-        // --- SCREEN 3 LOGIC (THE GAME) ---
-        let gameActive = false;
-        let loseScale = 1, winScale = 1;
-        let loseX = 0, loseY = 0, targetLoseX = 0, targetLoseY = 0;
-        let winPosX = 0, winPosY = 0; // win button fixed position
-        let winCurrentScale = 1, loseCurrentScale = 1;
-        let loseTargetScale = 1, winTargetScale = 1;
-        let frustration = 0;
-        let mouseX = -1000, mouseY = -1000;
-        let won = false;
-        // Cached DOM refs for game loop
-        let loseBtnC, winBtnC;
-
-        // Lightweight lerp function — no library needed
-        function lerp(a, b, t) { return a + (b - a) * t; }
-
-        document.addEventListener('mousemove', e => {
-            mouseX = e.clientX; mouseY = e.clientY;
-        });
-        document.addEventListener('touchmove', e => {
-            if (e.touches.length > 0) {
-                mouseX = e.touches[0].clientX;
-                mouseY = e.touches[0].clientY;
-            }
-        }, {passive: true});
-        document.addEventListener('touchstart', e => {
-            if (e.touches.length > 0) {
-                mouseX = e.touches[0].clientX;
-                mouseY = e.touches[0].clientY;
-            }
-        }, {passive: true});
-        document.addEventListener('touchend', e => {
-            if (e.touches.length === 0) { mouseX = -1000; mouseY = -1000; }
-        }, {passive: true});
-
-        function setTransform(el, x, y, scale) {
-            el.style.transform = `translate(calc(${x}px - 50%), calc(${y}px - 50%)) scale(${scale})`;
+        // ===== POINTER PARALLAX (subtle) =====
+        if (!REDUCED) {
+            window.addEventListener('pointermove', e => {
+                if (gameActive) return;
+                const x = (e.clientX / winW - 0.5) * 10;
+                const y = (e.clientY / winH - 0.5) * 10;
+                bgDots.style.setProperty('--px', x + 'px');
+                bgDots.style.setProperty('--py', y + 'px');
+            }, { passive: true });
         }
 
-        function startScreen3() {
+        // ===== GAME PHYSICS — critically-damped spring =====
+        function setPos(el, x, y, s) {
+            el.style.transform = `translate3d(${x|0}px, ${y|0}px, 0) scale(${s})`;
+        }
+
+        function startGame() {
             screen3.style.display = 'block';
-            document.getElementById('frustration-container').style.display = 'block';
-            document.getElementById('game-question').innerText = decodeURIComponent(q);
-
-            winBtnC = document.getElementById('win-btn-container');
-            loseBtnC = document.getElementById('lose-btn-container');
-            const winBtn = document.getElementById('win-btn');
-            const loseBtn = document.getElementById('lose-btn');
+            frustrationContainer.style.display = 'block';
+            gameQuestion.textContent = decodeURIComponent(q);
 
             if (winningAnswer === 'yes') {
-                winBtn.innerText = 'YES'; loseBtn.innerText = 'NO';
+                winBtn.textContent = 'YES'; loseBtn.textContent = 'NO';
+                winBtn.className = 'btn-game btn-yes';
+                loseBtn.className = 'btn-game btn-no';
             } else {
-                winBtn.innerText = 'NO'; loseBtn.innerText = 'YES';
+                winBtn.textContent = 'NO'; loseBtn.textContent = 'YES';
+                winBtn.className = 'btn-game btn-no';
+                loseBtn.className = 'btn-game btn-yes';
+            }
+            winBtn.setAttribute('aria-label', 'Winning answer: ' + winBtn.textContent);
+            loseBtn.setAttribute('aria-label', 'Losing answer: ' + loseBtn.textContent);
+
+            winW = innerWidth; winH = innerHeight;
+            sizeFxCanvas();
+            const cx = winW >> 1, cy = (winH * 0.55) | 0;
+
+            if (winW < 600) {
+                winPosX = cx - 80; winPosY = cy - 70;
+                loseX = cx - 80; loseY = cy + 70;
+            } else {
+                winPosX = cx - 200; winPosY = cy;
+                loseX = cx + 60; loseY = cy;
             }
 
-            let cx = window.innerWidth / 2;
-            let cy = window.innerHeight * 0.6;
-
-            if (window.innerWidth < 600) {
-                winPosX = cx; winPosY = cy - 80;
-                loseX = cx; loseY = cy + 80;
-            } else {
-                winPosX = cx - 150; winPosY = cy;
-                loseX = cx + 150; loseY = cy;
-            }
-
-            loseCurrentScale = 1; winCurrentScale = 1;
             loseTargetScale = 1; winTargetScale = 1;
-            setTransform(winBtnC, winPosX, winPosY, 1);
-            setTransform(loseBtnC, loseX, loseY, 1);
+            loseScale = 1; winScale = 1;
+            lvx = 0; lvy = 0;
             targetLoseX = loseX; targetLoseY = loseY;
+            setPos(winBtnC, winPosX, winPosY, 1);
+            setPos(loseBtnC, loseX, loseY, 1);
 
-            loseBtnC.addEventListener('mouseover', () => forceRunAway(true));
-            loseBtnC.addEventListener('touchstart', (e) => {
-                e.preventDefault(); forceRunAway(true);
-            }, { passive: false });
+            screen3.addEventListener('touchstart', onTouchStart, { passive: false });
+            screen3.addEventListener('touchmove', onTouchMove, { passive: true });
+            screen3.addEventListener('touchend', onTouchEnd, { passive: true });
+
+            loseBtnC.addEventListener('mouseenter', () => forceRun(true));
             winBtnC.addEventListener('click', winGame);
-            winBtnC.addEventListener('touchstart', (e) => {
-                e.preventDefault(); winGame();
-            }, { passive: false });
+            winBtn.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); winGame(); } });
 
-            gameActive = true;
-            requestAnimationFrame(gameLoop);
+            gameActive = true; won = false; frustration = 0;
+            frustrationBar.style.width = '0%';
+            winBtnC.style.setProperty('--halo', 0);
+            lastRunTime = performance.now();
+            lastFrame = performance.now();
+            particles.length = 0;
+            rafId = requestAnimationFrame(gameLoop);
         }
 
-        let lastRunAwayTime = 0;
-        function forceRunAway(ignoreDebounce = false) {
+        function onTouchStart(e) {
             if (!gameActive) return;
-            let now = Date.now();
-            let debounceTime = ignoreDebounce ? 50 : 300;
-            if (now - lastRunAwayTime < debounceTime) return;
-            lastRunAwayTime = now;
+            const t = e.touches[0];
+            mouseX = t.clientX; mouseY = t.clientY;
 
-            targetLoseX = (0.1 + Math.random() * 0.8) * window.innerWidth;
-            targetLoseY = (0.2 + Math.random() * 0.65) * window.innerHeight;
-            increaseFrustration();
+            const lrect = loseBtnC.getBoundingClientRect();
+            if (mouseX >= lrect.left && mouseX <= lrect.right &&
+                mouseY >= lrect.top && mouseY <= lrect.bottom) {
+                e.preventDefault();
+                forceRun(true);
+            }
+
+            const wrect = winBtnC.getBoundingClientRect();
+            if (mouseX >= wrect.left && mouseX <= wrect.right &&
+                mouseY >= wrect.top && mouseY <= wrect.bottom) {
+                e.preventDefault();
+                winGame();
+            }
         }
 
-        function increaseFrustration() {
-            frustration = Math.min(100, frustration + 12);
-            document.getElementById('frustration-bar').style.width = frustration + '%';
-            showTaunt(loseX, loseY);
-            if (navigator.vibrate) navigator.vibrate(50);
-            // Slow, teasing shrink — only 0.04 per hit
-            loseTargetScale = Math.max(0.3, loseTargetScale - 0.04);
-            winTargetScale  = Math.min(1.8, winTargetScale  + 0.05);
+        function onTouchMove(e) {
+            if (e.touches.length > 0) {
+                mouseX = e.touches[0].clientX;
+                mouseY = e.touches[0].clientY;
+            }
         }
 
-        function gameLoop() {
+        function onTouchEnd() {
+            mouseX = -9999; mouseY = -9999;
+        }
+
+        document.addEventListener('mousemove', e => { mouseX = e.clientX; mouseY = e.clientY; }, { passive: true });
+
+        function forceRun(ignoreDebounce) {
             if (!gameActive) return;
+            const now = performance.now();
+            if (!ignoreDebounce && now - lastRunTime < 150) return;
+            lastRunTime = now;
 
-            // Smooth position lerp (60fps butter)
-            loseX = lerp(loseX, targetLoseX, 0.1);
-            loseY = lerp(loseY, targetLoseY, 0.1);
+            const padX = winW * 0.08, padY = winH * 0.14;
+            // jump anywhere on screen, but away from pointer
+            let tx, ty, tries = 0;
+            do {
+                tx = padX + Math.random() * (winW - padX * 2 - 160);
+                ty = padY + Math.random() * (winH * 0.62);
+                tries++;
+            } while (tries < 6 && Math.hypot(tx - mouseX, ty - mouseY) < winW * 0.25);
+            targetLoseX = tx;
+            targetLoseY = ty;
 
-            // Smooth scale lerp — slow tease effect
-            loseCurrentScale = lerp(loseCurrentScale, loseTargetScale, 0.03);
-            winCurrentScale  = lerp(winCurrentScale,  winTargetScale,  0.03);
+            // give it a velocity kick away from pointer for snappy escape feel
+            const dx = (loseX + 80) - mouseX;
+            const dy = (loseY + 25) - mouseY;
+            const d = Math.hypot(dx, dy) || 1;
+            const kick = 14;
+            lvx += (dx / d) * kick;
+            lvy += (dy / d) * kick;
 
-            setTransform(loseBtnC, loseX, loseY, loseCurrentScale);
-            setTransform(winBtnC, winPosX, winPosY, winCurrentScale);
+            addFrustration();
+            spawnTrail(loseX + 80, loseY + 25);
+            playWhoosh();
+            if (navigator.vibrate && frustration < 100) navigator.vibrate(18);
 
-            // Proximity check
-            let dist = Math.hypot(mouseX - loseX, mouseY - loseY);
-            let threshold = 120 * loseCurrentScale + (window.innerWidth < 600 ? 60 : 40);
-            if (dist < threshold) forceRunAway();
-
-            requestAnimationFrame(gameLoop);
+            // shake increases w/ frustration
+            triggerShake();
         }
 
-        function showTaunt(x, y) {
-            const taunts = ["Missed!", "Too Slow!", "Nope!", "Try Again!", "Haha!", "Almost!", "Sike!"];
-            const t = document.createElement('div');
-            t.className = 'taunt';
-            t.innerText = taunts[Math.floor(Math.random() * taunts.length)];
-            t.style.left = x + 'px';
-            t.style.top = y + 'px';
-            document.body.appendChild(t);
-            setTimeout(() => t.remove(), 1000);
+        function addFrustration() {
+            frustration = Math.min(100, frustration + 10);
+            frustrationBar.style.width = frustration + '%';
+            showTaunt(loseX + 80, loseY + 25);
+            loseTargetScale = Math.max(0.45, loseTargetScale - 0.035);
+            winTargetScale = Math.min(1.45, winTargetScale + 0.045);
+            winBtnC.style.setProperty('--halo', (frustration / 100).toFixed(2));
+            if (frustration >= 60) srLive.textContent = 'Almost there — tap the highlighted button';
         }
 
-        // --- SCREEN 4 LOGIC (VICTORY) ---
-        function winGame() {
-            if (won || !gameActive) return;
-            won = true;
-            gameActive = false;
-            
-            document.getElementById('frustration-container').style.display = 'none';
-            screen3.style.display = 'none';
-            screen4.style.display = 'flex';
-            
-            playVictorySound();
-            confettiActive = true;
-            initConfetti();
-            renderConfetti();
+        function triggerShake() {
+            if (REDUCED) return;
+            const level = frustration < 30 ? 1 : frustration < 70 ? 2 : 3;
+            screen3.classList.remove('shake-1','shake-2','shake-3');
+            // force reflow so animation restarts
+            void screen3.offsetWidth;
+            screen3.classList.add('shake-' + level);
         }
 
-        function restartApp() {
-            window.location.href = window.location.origin + window.location.pathname;
+        // ===== MAIN LOOP =====
+        let lastFrame = performance.now();
+        let frameCount = 0;
+
+        function gameLoop(now) {
+            if (!gameActive) return;
+            rafId = requestAnimationFrame(gameLoop);
+
+            const dt = Math.min((now - lastFrame) / 16.667, 2.5);
+            lastFrame = now;
+            frameCount++;
+
+            // Critically-damped spring toward target
+            const k = 0.18; // stiffness
+            const d = 0.78; // damping
+            const ax = (targetLoseX - loseX) * k;
+            const ay = (targetLoseY - loseY) * k;
+            lvx = (lvx + ax * dt) * Math.pow(d, dt);
+            lvy = (lvy + ay * dt) * Math.pow(d, dt);
+            loseX += lvx * dt;
+            loseY += lvy * dt;
+
+            loseScale += (loseTargetScale - loseScale) * 0.12 * dt;
+            winScale += (winTargetScale - winScale) * 0.12 * dt;
+
+            setPos(loseBtnC, loseX, loseY, loseScale);
+            setPos(winBtnC, winPosX, winPosY, winScale);
+
+            // Distance check every 2 frames
+            if (frameCount % 2 === 0) {
+                const dxm = mouseX - (loseX + 80), dym = mouseY - (loseY + 25);
+                const dist = Math.sqrt(dxm*dxm + dym*dym);
+                const threshold = 85 * loseScale + (winW < 600 ? 44 : 22);
+                if (dist < threshold) forceRun(false);
+            }
+
+            renderParticles(dt);
         }
 
-        document.getElementById('restart-btn').addEventListener('click', restartApp);
-        document.getElementById('restart-btn').addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            restartApp();
-        }, { passive: false });
-
-        // --- AUDIO SYSTEM ---
-        function playVictorySound() {
-            if (!audioCtx) return;
-            if(audioCtx.state === 'suspended') audioCtx.resume();
-            
-            const playNote = (freq, startTime, duration) => {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(freq, startTime);
-                
-                gain.gain.setValueAtTime(0, startTime);
-                gain.gain.linearRampToValueAtTime(0.3, startTime + 0.05);
-                gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
-                
-                osc.start(startTime);
-                osc.stop(startTime + duration);
-            };
-            
-            const now = audioCtx.currentTime;
-            playNote(523.25, now, 0.2); // C5
-            playNote(659.25, now + 0.1, 0.2); // E5
-            playNote(783.99, now + 0.2, 0.4); // G5
-            playNote(1046.50, now + 0.3, 0.6); // C6
-        }
-
-        // --- CONFETTI SYSTEM ---
-        let confettiActive = false;
-        let canvas, ctx;
-        let confettis = [];
-
-        function initConfetti() {
-            canvas = document.createElement('canvas');
-            canvas.id = 'confetti-canvas';
-            document.body.appendChild(canvas);
-            ctx = canvas.getContext('2d');
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            canvas.style.position = 'fixed';
-            canvas.style.top = '0';
-            canvas.style.left = '0';
-            canvas.style.pointerEvents = 'none';
-            canvas.style.zIndex = '9999';
-
-            // 60 particles — smooth on all devices
-            for(let i=0; i<60; i++) {
-                confettis.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height - canvas.height,
-                    w: Math.random() * 10 + 5,
-                    h: Math.random() * 10 + 5,
-                    c: ['#FF0080', '#00FFFF', '#32CD32', '#FFD700', '#FFFFFF'][Math.floor(Math.random()*5)],
-                    v: Math.random() * 4 + 2,
-                    a: Math.random() * 360,
-                    s: Math.random() * 0.08 + 0.02
+        // ===== PARTICLE TRAIL =====
+        function spawnTrail(x, y) {
+            if (REDUCED) return;
+            const n = 10;
+            for (let i = 0; i < n; i++) {
+                const a = Math.random() * Math.PI * 2;
+                const sp = Math.random() * 3 + 1;
+                particles.push({
+                    x, y,
+                    vx: Math.cos(a) * sp,
+                    vy: Math.sin(a) * sp,
+                    life: 1,
+                    decay: 0.025 + Math.random() * 0.02,
+                    size: Math.random() * 4 + 2,
+                    hue: 320 + Math.random() * 40
                 });
             }
+            // hard cap
+            if (particles.length > 250) particles.splice(0, particles.length - 250);
+        }
+
+        function renderParticles(dt) {
+            fxCtx.clearRect(0, 0, winW, winH);
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.vx * dt;
+                p.y += p.vy * dt;
+                p.vy += 0.08 * dt;
+                p.life -= p.decay * dt;
+                if (p.life <= 0) { particles.splice(i, 1); continue; }
+                fxCtx.globalAlpha = Math.max(0, p.life);
+                fxCtx.fillStyle = `hsl(${p.hue}, 100%, 65%)`;
+                fxCtx.beginPath();
+                fxCtx.arc(p.x, p.y, p.size * p.life, 0, 6.2832);
+                fxCtx.fill();
+            }
+            fxCtx.globalAlpha = 1;
+        }
+
+        // ===== TAUNT POOL =====
+        const taunts = ["😜 Nice try!","😝 Close!","🙅 Nope!","😏 Too slow!","😈 Almost!","😎 Sike!","🤪 Missed!","🤣 Whoops!","😤 Try again!","🤭 Haha!"];
+
+        function initTaunts() {
+            for (let i = 0; i < 5; i++) {
+                const el = document.createElement('div');
+                el.className = 'taunt';
+                el.style.display = 'none';
+                document.body.appendChild(el);
+                tauntPool.push(el);
+            }
+        }
+        initTaunts();
+
+        function showTaunt(x, y) {
+            const el = tauntPool[tauntIdx];
+            tauntIdx = (tauntIdx + 1) % tauntPool.length;
+            el.textContent = taunts[(Math.random() * taunts.length) | 0];
+            el.style.left = x + 'px';
+            el.style.top = y + 'px';
+            el.style.display = 'block';
+            el.style.animation = 'none';
+            void el.offsetHeight;
+            el.style.animation = 'tauntUp 0.75s cubic-bezier(.2,.8,.2,1) forwards';
+            clearTimeout(el._t);
+            el._t = setTimeout(() => el.style.display = 'none', 760);
+        }
+
+        // ===== VICTORY =====
+        function winGame() {
+            if (won || !gameActive) return;
+            won = true; gameActive = false;
+            if (rafId) cancelAnimationFrame(rafId);
+
+            screen3.removeEventListener('touchstart', onTouchStart);
+            screen3.removeEventListener('touchmove', onTouchMove);
+            screen3.removeEventListener('touchend', onTouchEnd);
+            screen3.classList.remove('shake-1','shake-2','shake-3');
+
+            frustrationContainer.style.display = 'none';
+            fxCtx.clearRect(0, 0, winW, winH);
+            screen3.style.display = 'none';
+            screen4.style.display = 'flex';
+            srLive.textContent = 'You won!';
+
+            playVictorySound();
+            startConfetti();
+        }
+
+        restartBtn.addEventListener('click', () => location.href = location.origin + location.pathname);
+        restartBtn.addEventListener('touchstart', e => { e.preventDefault(); location.href = location.origin + location.pathname; }, { passive: false });
+
+        // ===== AUDIO =====
+        function playWhoosh() {
+            if (!audioCtx) return;
+            try {
+                const t = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                const filt = audioCtx.createBiquadFilter();
+                osc.type = 'sawtooth';
+                // pitch climbs w/ frustration
+                const baseFreq = 320 + frustration * 6;
+                osc.frequency.setValueAtTime(baseFreq, t);
+                osc.frequency.exponentialRampToValueAtTime(baseFreq * 0.4, t + 0.18);
+                filt.type = 'lowpass';
+                filt.frequency.setValueAtTime(1800, t);
+                gain.gain.setValueAtTime(0, t);
+                gain.gain.linearRampToValueAtTime(0.08, t + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.0005, t + 0.2);
+                osc.connect(filt); filt.connect(gain); gain.connect(audioCtx.destination);
+                osc.start(t);
+                osc.stop(t + 0.22);
+            } catch (e) { /* ignore */ }
+        }
+
+        function playVictorySound() {
+            if (!audioCtx) return;
+            try {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+
+                const play = (freq, t, dur, type) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.type = type || 'sine';
+                    osc.frequency.setValueAtTime(freq, t);
+                    gain.gain.setValueAtTime(0, t);
+                    gain.gain.linearRampToValueAtTime(0.22, t + 0.03);
+                    gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+                    osc.start(t);
+                    osc.stop(t + dur);
+                };
+
+                const t = audioCtx.currentTime;
+                play(523.25, t, 0.14);
+                play(659.25, t + 0.07, 0.14);
+                play(783.99, t + 0.14, 0.28);
+                play(1046.50, t + 0.22, 0.45);
+                // sparkle layer
+                play(1318.51, t + 0.28, 0.4, 'triangle');
+            } catch (e) { /* ignore */ }
+        }
+
+        // ===== CONFETTI =====
+        function startConfetti() {
+            if (confettiActive) return;
+            confettiActive = true;
+
+            confettiCanvas = document.createElement('canvas');
+            confettiCanvas.id = 'confetti-canvas';
+            document.body.appendChild(confettiCanvas);
+            confettiCtx = confettiCanvas.getContext('2d', { alpha: true });
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            confettiCanvas.width = winW * dpr;
+            confettiCanvas.height = winH * dpr;
+            confettiCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+            const colors = ['#FF1493','#00FFFF','#32CD32','#FFD700','#FFFFFF','#9D00FF','#FF6B00','#2ECC71'];
+            const count = REDUCED ? 30 : (winW < 600 ? 70 : 120);
+            const shapes = ['rect','circle','strip'];
+
+            // initial cannon burst from bottom corners
+            for (let i = 0; i < count; i++) {
+                const fromLeft = i % 2 === 0;
+                confettis.push({
+                    x: fromLeft ? -10 : winW + 10,
+                    y: winH + 10,
+                    w: (Math.random() * 7 + 4) | 0,
+                    h: (Math.random() * 10 + 4) | 0,
+                    c: colors[(Math.random() * colors.length) | 0],
+                    vx: (fromLeft ? 1 : -1) * (Math.random() * 6 + 5),
+                    vy: -(Math.random() * 9 + 11),
+                    g: 0.32,
+                    rot: Math.random() * 6.28,
+                    vr: (Math.random() - 0.5) * 0.22,
+                    shape: shapes[(Math.random() * shapes.length) | 0]
+                });
+            }
+            // gentle rain layer
+            const rain = REDUCED ? 0 : (winW < 600 ? 30 : 50);
+            for (let i = 0; i < rain; i++) {
+                confettis.push({
+                    x: Math.random() * winW,
+                    y: -Math.random() * winH,
+                    w: (Math.random() * 7 + 3) | 0,
+                    h: (Math.random() * 7 + 3) | 0,
+                    c: colors[(Math.random() * colors.length) | 0],
+                    vx: (Math.random() - 0.5) * 1.6,
+                    vy: Math.random() * 3 + 2,
+                    g: 0.05,
+                    rot: Math.random() * 6.28,
+                    vr: (Math.random() - 0.5) * 0.12,
+                    osc: Math.random() * 6.28,
+                    oscSpd: Math.random() * 0.04 + 0.015,
+                    shape: shapes[(Math.random() * shapes.length) | 0]
+                });
+            }
+            requestAnimationFrame(renderConfetti);
         }
 
         function renderConfetti() {
-            if(!confettiActive) return;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            confettis.forEach(c => {
-                c.y += c.v;
-                c.a += c.s;
-                if(c.y > canvas.height) {
-                    c.y = -20;
-                    c.x = Math.random() * canvas.width;
+            if (!confettiActive) return;
+            confettiCtx.clearRect(0, 0, winW, winH);
+
+            for (let i = 0, n = confettis.length; i < n; i++) {
+                const p = confettis[i];
+                p.vy += p.g;
+                p.y += p.vy;
+                if (p.osc !== undefined) {
+                    p.x += p.vx + Math.sin(p.osc) * 1.2;
+                    p.osc += p.oscSpd;
+                } else {
+                    p.x += p.vx;
                 }
-                ctx.save();
-                ctx.translate(c.x, c.y);
-                ctx.rotate(c.a);
-                ctx.fillStyle = c.c;
-                ctx.fillRect(-c.w/2, -c.h/2, c.w, c.h);
-                ctx.restore();
-            });
+                p.rot += p.vr;
+
+                // recycle rainers
+                if (p.osc !== undefined && p.y > winH) {
+                    p.y = -12;
+                    p.x = Math.random() * winW;
+                    p.vy = Math.random() * 3 + 2;
+                }
+
+                const cos = Math.cos(p.rot), sin = Math.sin(p.rot);
+                confettiCtx.setTransform(cos, sin, -sin, cos, p.x, p.y);
+                confettiCtx.fillStyle = p.c;
+                if (p.shape === 'circle') {
+                    confettiCtx.beginPath();
+                    confettiCtx.arc(0, 0, p.w/2, 0, 6.2832);
+                    confettiCtx.fill();
+                } else if (p.shape === 'strip') {
+                    confettiCtx.fillRect(-p.w/2, -p.h, p.w, p.h*2);
+                } else {
+                    confettiCtx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+                }
+            }
+
+            confettiCtx.setTransform(1, 0, 0, 1, 0, 0);
+            // cull cannon particles that fell offscreen + have no recycle
+            for (let i = confettis.length - 1; i >= 0; i--) {
+                const p = confettis[i];
+                if (p.osc === undefined && p.y > winH + 80) confettis.splice(i, 1);
+            }
             requestAnimationFrame(renderConfetti);
         }
+
+        // ===== RESIZE =====
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                winW = innerWidth; winH = innerHeight;
+                sizeFxCanvas();
+                if (confettiCanvas) {
+                    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+                    confettiCanvas.width = winW * dpr;
+                    confettiCanvas.height = winH * dpr;
+                    confettiCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                }
+            }, 150);
+        }, { passive: true });
+
+        // Pause loop when tab hidden — save battery
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && rafId) {
+                cancelAnimationFrame(rafId);
+                rafId = null;
+            } else if (!document.hidden && gameActive && !rafId) {
+                lastFrame = performance.now();
+                rafId = requestAnimationFrame(gameLoop);
+            }
+        });
     </script>
 </body>
 </html>
