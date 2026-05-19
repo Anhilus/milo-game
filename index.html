@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="color-scheme" content="only light">
     <meta name="supported-color-schemes" content="light">
-    <meta name="theme-color" content="#2ECC71">
-    <meta name="description" content="Milo — a playful prank game. Create a question, pick the winning answer, share the link, watch friends chase it.">
+    <meta name="theme-color" content="#0f766e">
+    <meta name="description" content="Milo — a playful prank game. Create a question, pick the winning answer, share the link, watch your friends chase it.">
     <meta property="og:title" content="Milo — The Chase Game">
     <meta property="og:description" content="Pick the right answer. If you can catch it.">
     <meta property="og:type" content="website">
@@ -14,22 +14,36 @@
     <title>Milo</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Space+Grotesk:wght@500;600;700&family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --green: #32CD32;
-            --green-deep: #16A085;
-            --pink: #FF1493;
-            --pink-soft: #ff5fb8;
-            --gold: #FFD700;
-            --dark: #000000;
-            --bg-1: #2ECC71;
-            --bg-2: #1ABC9C;
-            --bg-3: #16A085;
+            /* Jewel-tone premium palette */
+            --emerald: #10b981;
+            --emerald-deep: #047857;
+            --teal: #14b8a6;
+            --cyan: #06b6d4;
+            --indigo: #6366f1;
+            --violet: #8b5cf6;
+            --rose: #fb7185;
+            --rose-deep: #e11d48;
+            --amber: #fbbf24;
+            --amber-deep: #f59e0b;
+            --pearl: #fafaf9;
+            --ink: #0f172a;
+            --shadow-ink: rgba(15, 23, 42, 0.45);
+
+            --bg-1: #0d9488;
+            --bg-2: #0891b2;
+            --bg-3: #14b8a6;
+
             --safe-top: env(safe-area-inset-top, 0px);
             --safe-bottom: env(safe-area-inset-bottom, 0px);
             --safe-left: env(safe-area-inset-left, 0px);
             --safe-right: env(safe-area-inset-right, 0px);
+
+            --font-display: 'Fredoka One', 'Space Grotesk', system-ui, sans-serif;
+            --font-ui: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+            --font-body: 'Inter', system-ui, -apple-system, sans-serif;
         }
 
         * {
@@ -47,9 +61,10 @@
             height: 100%;
             height: 100dvh;
             overflow: hidden;
-            font-family: 'Fredoka One', 'Inter', system-ui, -apple-system, sans-serif;
-            background: var(--bg-1);
-            color: #fff;
+            font-family: var(--font-body);
+            /* IMPORTANT: keep transparent so mesh layer shows through */
+            background: transparent;
+            color: var(--pearl);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -58,202 +73,278 @@
             overscroll-behavior: none;
         }
 
-        /* Mesh gradient — 4 radial blobs drifting */
-        .bg-mesh {
+        /* Fallback solid base under mesh (in case backdrop-filter / radial gradients fail) */
+        html { background: var(--bg-1); }
+
+        /* ===== Layered background ===== */
+        /* Aurora mesh — flowing jewel tones */
+        .bg-aurora {
+            position: fixed;
+            inset: 0;
+            z-index: -3;
+            background:
+                radial-gradient(ellipse 80% 60% at 15% 20%, #34d399 0%, transparent 55%),
+                radial-gradient(ellipse 70% 50% at 85% 25%, #22d3ee 0%, transparent 55%),
+                radial-gradient(ellipse 75% 65% at 75% 85%, #6366f1 0%, transparent 50%),
+                radial-gradient(ellipse 65% 55% at 20% 80%, #14b8a6 0%, transparent 55%),
+                linear-gradient(160deg, #0d9488 0%, #0e7490 45%, #155e75 100%);
+            background-size: 220% 220%;
+            animation: auroraDrift 24s ease-in-out infinite alternate;
+            will-change: background-position;
+        }
+        @keyframes auroraDrift {
+            0%   { background-position: 0% 0%, 100% 0%, 100% 100%, 0% 100%, 0 0; }
+            100% { background-position: 25% 35%, 70% 20%, 55% 85%, 30% 70%, 0 0; }
+        }
+
+        /* Grain noise — subtle texture (SVG fractal noise inlined) */
+        .bg-noise {
             position: fixed;
             inset: 0;
             z-index: -2;
-            background:
-                radial-gradient(circle at 20% 20%, #3df58a 0%, transparent 45%),
-                radial-gradient(circle at 80% 30%, #1ABC9C 0%, transparent 50%),
-                radial-gradient(circle at 70% 80%, #16A085 0%, transparent 55%),
-                radial-gradient(circle at 25% 75%, #2ECC71 0%, transparent 50%),
-                linear-gradient(180deg, #2ECC71, #16A085);
-            background-size: 200% 200%;
-            animation: meshDrift 22s ease-in-out infinite alternate;
-            will-change: background-position;
-        }
-        @keyframes meshDrift {
-            0%   { background-position: 0% 0%, 100% 0%, 100% 100%, 0% 100%, 0 0; }
-            100% { background-position: 20% 30%, 70% 20%, 60% 90%, 30% 70%, 0 0; }
+            opacity: 0.10;
+            mix-blend-mode: overlay;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.5 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+            background-size: 240px 240px;
         }
 
-        /* Dot pattern w/ pointer-parallax via CSS vars */
+        /* Vignette on game screen for depth */
+        .bg-vignette {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+            background: radial-gradient(ellipse at center, transparent 50%, rgba(15, 23, 42, 0.35) 100%);
+            opacity: 0;
+            transition: opacity 0.6s ease;
+        }
+        body.in-game .bg-vignette { opacity: 1; }
+
+        /* Soft dot lattice with pointer parallax */
         .bg-dots {
             position: fixed;
-            inset: -20px;
+            inset: -30px;
             z-index: -1;
-            background-image: radial-gradient(circle, rgba(0,0,0,0.10) 1.5px, transparent 1.5px);
-            background-size: 26px 26px;
+            background-image: radial-gradient(circle, rgba(255,255,255,0.10) 1.3px, transparent 1.3px);
+            background-size: 28px 28px;
             transform: translate3d(var(--px, 0px), var(--py, 0px), 0);
-            transition: transform 0.4s cubic-bezier(.2,.8,.2,1);
+            transition: transform 0.5s cubic-bezier(.2,.8,.2,1);
             pointer-events: none;
+            opacity: 0.7;
         }
 
-        /* Logo */
+        /* ===== Logo ===== */
         #logo {
             position: fixed;
             top: calc(18px + var(--safe-top));
             left: calc(18px + var(--safe-left));
-            font-size: 1.6rem;
-            font-weight: bold;
-            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: var(--font-display);
+            font-size: 1.55rem;
+            color: var(--pearl);
             z-index: 100;
             user-select: none;
             pointer-events: none;
-            text-shadow: 2px 2px 0 #000, 3px 3px 0 rgba(0,0,0,0.3);
+            text-shadow: 2px 2px 0 var(--ink), 3px 3px 0 rgba(15, 23, 42, 0.35);
             letter-spacing: 1px;
         }
+        #logo .ic { width: 30px; height: 30px; filter: drop-shadow(2px 2px 0 var(--ink)); }
 
-        /* Screens */
+        /* ===== Screens ===== */
         .screen {
             width: 92%;
-            max-width: 440px;
+            max-width: 460px;
             text-align: center;
             display: none;
             flex-direction: column;
             align-items: center;
             z-index: 10;
             position: relative;
-            animation: fadeIn 0.5s cubic-bezier(.2,.8,.2,1);
+            animation: fadeIn 0.55s cubic-bezier(.2,.8,.2,1);
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(16px) scale(0.98); }
+            from { opacity: 0; transform: translateY(18px) scale(0.97); }
             to   { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         h1 {
-            font-size: 2.3rem;
-            color: #fff;
-            text-shadow: 3px 3px 0 #000, 4px 4px 0 rgba(0,0,0,0.2);
+            font-family: var(--font-display);
+            font-size: 2.4rem;
+            color: var(--pearl);
+            text-shadow: 3px 3px 0 var(--ink), 4px 4px 0 rgba(15, 23, 42, 0.22);
             margin-bottom: 32px;
             line-height: 1.2;
             letter-spacing: 1px;
         }
 
         h2 {
+            font-family: var(--font-display);
             font-size: 1.55rem;
-            color: #fff;
-            text-shadow: 2px 2px 0 #000;
+            color: var(--pearl);
+            text-shadow: 2px 2px 0 var(--ink);
             margin-bottom: 18px;
         }
 
-        /* Glass card around screen 1 form */
+        /* Glass card — premium frosted surface */
         .glass {
-            padding: 28px 22px 26px;
-            border-radius: 28px;
-            background: rgba(255,255,255,0.10);
-            backdrop-filter: blur(14px) saturate(140%);
-            -webkit-backdrop-filter: blur(14px) saturate(140%);
-            border: 1.5px solid rgba(255,255,255,0.25);
-            box-shadow: 0 12px 40px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.25);
+            padding: 30px 24px 28px;
+            border-radius: 32px;
+            background: linear-gradient(145deg, rgba(255,255,255,0.16), rgba(255,255,255,0.06));
+            backdrop-filter: blur(18px) saturate(160%);
+            -webkit-backdrop-filter: blur(18px) saturate(160%);
+            border: 1.5px solid rgba(255,255,255,0.28);
+            box-shadow:
+                0 18px 50px rgba(15, 23, 42, 0.28),
+                inset 0 1px 0 rgba(255,255,255,0.35),
+                inset 0 -1px 0 rgba(255,255,255,0.08);
             width: 100%;
         }
 
         /* Input field */
         input[type="text"] {
             width: 100%;
-            padding: 15px 18px;
-            font-family: 'Fredoka One', 'Inter', sans-serif;
-            font-size: 1.1rem;
-            border: 3px solid #000;
+            padding: 16px 20px;
+            font-family: var(--font-ui);
+            font-weight: 600;
+            font-size: 1.05rem;
+            border: 3px solid var(--ink);
             border-radius: 18px;
             margin-bottom: 22px;
             outline: none;
-            background: #fff;
-            color: #000;
-            box-shadow: 3px 5px 0 #000;
+            background: var(--pearl);
+            color: var(--ink);
+            box-shadow: 3px 5px 0 var(--ink);
             transition: transform 0.18s cubic-bezier(.2,.8,.2,1), box-shadow 0.18s;
         }
-
         input[type="text"]:focus {
             transform: translateY(-2px);
-            box-shadow: 3px 7px 0 #000;
+            box-shadow: 3px 7px 0 var(--ink);
         }
         input[type="text"]:focus-visible {
-            outline: 3px solid var(--gold);
+            outline: 3px solid var(--amber);
             outline-offset: 3px;
         }
+        input::placeholder { color: #64748b; font-weight: 500; }
 
         /* Toggle section */
         .toggle-container {
             margin-bottom: 26px;
-            font-size: 1.1rem;
-            text-shadow: 2px 2px 0 #000;
+            font-size: 1.05rem;
+            font-family: var(--font-ui);
+            font-weight: 600;
+            text-shadow: 2px 2px 0 var(--ink);
         }
 
         .toggle {
             display: flex;
             justify-content: center;
             margin-top: 12px;
-            background: #000;
+            background: var(--ink);
             border-radius: 50px;
             padding: 4px;
             gap: 4px;
             position: relative;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
         }
 
         .toggle-btn {
             flex: 1;
-            padding: 11px 28px;
-            font-family: 'Fredoka One', 'Inter', sans-serif;
-            font-size: 1.1rem;
+            padding: 12px 28px;
+            font-family: var(--font-display);
+            font-size: 1.05rem;
             border: none;
             background: transparent;
-            color: #fff;
+            color: rgba(255,255,255,0.55);
             cursor: pointer;
             border-radius: 50px;
-            transition: color 0.2s ease;
-            letter-spacing: 1px;
+            transition: color 0.25s ease;
+            letter-spacing: 2px;
             position: relative;
             z-index: 1;
         }
+        .toggle-btn.active { color: #fff; }
 
-        .toggle-btn.active {
-            color: #fff;
-        }
         .toggle-thumb {
             position: absolute;
             top: 4px; left: 4px;
             width: calc(50% - 4px);
             height: calc(100% - 8px);
-            background: var(--pink);
+            background: linear-gradient(135deg, var(--rose) 0%, var(--rose-deep) 100%);
             border-radius: 50px;
-            box-shadow: 0 0 18px rgba(255,20,147,0.5);
-            transition: transform 0.32s cubic-bezier(.34,1.56,.64,1);
+            box-shadow: 0 4px 18px rgba(244, 63, 94, 0.55), inset 0 1px 0 rgba(255,255,255,0.3);
+            transition: transform 0.36s cubic-bezier(.34,1.56,.64,1), background 0.3s;
             z-index: 0;
         }
+        .toggle[data-winner="no"] .toggle-thumb {
+            background: linear-gradient(135deg, var(--emerald) 0%, var(--emerald-deep) 100%);
+            box-shadow: 0 4px 18px rgba(16, 185, 129, 0.55), inset 0 1px 0 rgba(255,255,255,0.3);
+        }
 
-        /* Main action button */
+        /* ===== Buttons ===== */
         .btn {
-            font-family: 'Fredoka One', 'Inter', sans-serif;
-            font-size: 1.3rem;
-            padding: 14px 36px;
-            border: 3px solid #000;
+            font-family: var(--font-display);
+            font-size: 1.2rem;
+            padding: 14px 32px;
+            border: 3px solid var(--ink);
             border-radius: 50px;
             cursor: pointer;
-            box-shadow: 4px 6px 0 #000;
-            transition: transform 0.12s cubic-bezier(.34,1.56,.64,1), box-shadow 0.12s, background 0.2s;
+            box-shadow: 4px 6px 0 var(--ink);
+            transition: transform 0.14s cubic-bezier(.34,1.56,.64,1), box-shadow 0.14s, filter 0.2s;
             text-transform: uppercase;
             outline: none;
             user-select: none;
             min-width: 180px;
-            letter-spacing: 1px;
+            letter-spacing: 1.2px;
             position: relative;
             overflow: hidden;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            color: var(--ink);
         }
-        .btn:hover { transform: translateY(-2px); box-shadow: 4px 8px 0 #000; }
+        .btn .ic { width: 22px; height: 22px; flex-shrink: 0; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 4px 8px 0 var(--ink); filter: brightness(1.05); }
         .btn:active {
             transform: translateY(4px) !important;
-            box-shadow: 2px 2px 0 #000 !important;
+            box-shadow: 2px 2px 0 var(--ink) !important;
         }
-        .btn:focus-visible { outline: 3px solid var(--gold); outline-offset: 4px; }
+        .btn:focus-visible { outline: 3px solid var(--amber); outline-offset: 4px; }
 
-        .btn-action { background: var(--gold); color: #000; }
-        .btn-action:hover { background: #FFE55C; }
+        .btn-action {
+            background: linear-gradient(135deg, var(--amber) 0%, var(--amber-deep) 100%);
+            color: var(--ink);
+        }
+        .btn-pink {
+            background: linear-gradient(135deg, var(--rose) 0%, var(--rose-deep) 100%);
+            color: #fff;
+        }
+        .btn-blue {
+            background: linear-gradient(135deg, var(--cyan) 0%, var(--indigo) 100%);
+            color: #fff;
+        }
 
-        /* Game Screen */
+        /* Sheen on action button — subtle moving highlight */
+        .btn-action::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -120%;
+            width: 60%; height: 100%;
+            background: linear-gradient(120deg, transparent, rgba(255,255,255,0.55), transparent);
+            transform: skewX(-20deg);
+            animation: sheen 3.5s ease-in-out infinite;
+            pointer-events: none;
+        }
+        @keyframes sheen {
+            0%, 60% { left: -120%; }
+            100% { left: 120%; }
+        }
+
+        /* ===== Game Screen ===== */
         #screen3 {
             width: 100%;
             height: 100%;
@@ -266,16 +357,18 @@
 
         .game-question {
             position: absolute;
-            top: calc(16% + var(--safe-top));
+            top: calc(14% + var(--safe-top));
             left: 50%;
             transform: translateX(-50%);
-            width: 90%;
+            width: 92%;
+            max-width: 720px;
+            font-family: var(--font-display);
             font-size: 2rem;
             text-align: center;
             z-index: 5;
             pointer-events: none;
-            color: #fff;
-            text-shadow: 3px 3px 0 #000, 4px 4px 0 rgba(0,0,0,0.2);
+            color: var(--pearl);
+            text-shadow: 3px 3px 0 var(--ink), 4px 4px 0 rgba(15, 23, 42, 0.22);
             line-height: 1.3;
         }
 
@@ -285,15 +378,15 @@
             will-change: transform;
         }
 
-        /* Game buttons */
+        /* Game answer buttons — premium chunky pill */
         .btn-game {
-            font-family: 'Fredoka One', 'Inter', sans-serif;
+            font-family: var(--font-display);
             font-size: 1.4rem;
             padding: 18px 50px;
-            border: 3px solid #000;
+            border: 3px solid var(--ink);
             border-radius: 50px;
             cursor: pointer;
-            box-shadow: 4px 8px 0 #000;
+            box-shadow: 4px 8px 0 var(--ink), 0 14px 40px rgba(15,23,42,0.25);
             transition: filter 0.15s ease;
             text-transform: uppercase;
             outline: none;
@@ -304,29 +397,35 @@
             will-change: transform;
             position: relative;
         }
-        .btn-game:focus-visible { outline: 3px solid var(--gold); outline-offset: 4px; }
-        .btn-yes { background: var(--green); }
-        .btn-no  { background: var(--pink); }
+        .btn-game:focus-visible { outline: 3px solid var(--amber); outline-offset: 4px; }
+        .btn-yes {
+            background: linear-gradient(135deg, var(--emerald) 0%, var(--emerald-deep) 100%);
+            text-shadow: 0 2px 0 rgba(0,0,0,0.25);
+        }
+        .btn-no {
+            background: linear-gradient(135deg, var(--rose) 0%, var(--rose-deep) 100%);
+            text-shadow: 0 2px 0 rgba(0,0,0,0.25);
+        }
 
         /* Halo around winning button — intensifies w/ frustration */
         #win-btn-container::before {
             content: '';
             position: absolute;
-            inset: -12px;
-            border-radius: 50px;
-            background: radial-gradient(ellipse at center, rgba(255,215,0, calc(0.25 + var(--halo, 0) * 0.6)) 0%, transparent 70%);
-            filter: blur(8px);
+            inset: -16px;
+            border-radius: 60px;
+            background: radial-gradient(ellipse at center, rgba(251, 191, 36, calc(0.30 + var(--halo, 0) * 0.55)) 0%, transparent 70%);
+            filter: blur(10px);
             z-index: -1;
             pointer-events: none;
             transition: opacity 0.2s;
         }
 
-        /* Frustration bar */
+        /* ===== Frustration bar ===== */
         #frustration-container {
             position: fixed;
             top: var(--safe-top); left: 0;
             width: 100%; height: 10px;
-            background: rgba(0,0,0,0.3);
+            background: rgba(15, 23, 42, 0.35);
             display: none;
             z-index: 200;
             overflow: hidden;
@@ -334,31 +433,31 @@
 
         #frustration-bar {
             width: 0%; height: 100%;
-            background: linear-gradient(90deg, var(--green), var(--gold), var(--pink));
+            background: linear-gradient(90deg, var(--emerald), var(--amber), var(--rose));
             background-size: 200% 100%;
             transition: width 0.18s cubic-bezier(.2,.8,.2,1);
-            box-shadow: 0 0 10px rgba(255,20,147,0.5);
+            box-shadow: 0 0 12px rgba(244, 63, 94, 0.55);
             position: relative;
         }
         #frustration-bar::after {
             content: '';
             position: absolute;
             inset: 0;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent);
             transform: translateX(-100%);
             animation: shimmer 1.6s linear infinite;
         }
         @keyframes shimmer { to { transform: translateX(100%); } }
 
-        /* Taunt messages */
+        /* ===== Taunt messages ===== */
         .taunt {
             position: absolute;
-            color: #fff;
+            font-family: var(--font-display);
+            color: var(--pearl);
             font-size: 1.5rem;
-            font-weight: bold;
-            text-shadow: 2px 2px 0 #000, 0 0 12px rgba(0,0,0,0.4);
+            text-shadow: 2px 2px 0 var(--ink), 0 0 14px rgba(0,0,0,0.4);
             pointer-events: none;
-            animation: tauntUp 0.75s cubic-bezier(.2,.8,.2,1) forwards;
+            animation: tauntUp 0.78s cubic-bezier(.2,.8,.2,1) forwards;
             z-index: 50;
             white-space: nowrap;
             letter-spacing: 1px;
@@ -367,11 +466,11 @@
 
         @keyframes tauntUp {
             0%   { opacity: 0; transform: translate(-50%, -30%) scale(0.7) rotate(-6deg); }
-            20%  { opacity: 1; transform: translate(-50%, -55%) scale(1.15) rotate(2deg); }
-            100% { opacity: 0; transform: translate(-50%, -150%) scale(1) rotate(-3deg); }
+            20%  { opacity: 1; transform: translate(-50%, -55%) scale(1.18) rotate(2deg); }
+            100% { opacity: 0; transform: translate(-50%, -160%) scale(1) rotate(-3deg); }
         }
 
-        /* Screen-shake — applied to #screen3 */
+        /* Screen-shake tiers */
         .shake-1 { animation: shake1 0.18s ease-out; }
         .shake-2 { animation: shake2 0.22s ease-out; }
         .shake-3 { animation: shake3 0.26s ease-out; }
@@ -389,40 +488,62 @@
             z-index: 6;
         }
 
-        /* Victory screen */
+        /* Victory */
         .victory-title {
-            font-size: 2.2rem;
-            margin-bottom: 15px;
+            font-family: var(--font-display);
+            font-size: 2.4rem;
+            margin-bottom: 8px;
+        }
+        .victory-sub {
+            font-family: var(--font-ui);
+            font-weight: 600;
+            font-size: 1.05rem;
+            color: rgba(250,250,249,0.85);
+            margin-bottom: 6px;
+            letter-spacing: 0.4px;
+            text-shadow: 1px 1px 0 var(--ink);
         }
 
         .credit {
-            font-size: 1.4rem;
-            margin: 25px 0;
-            color: var(--gold);
-            text-shadow: 2px 2px 0 #000;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-family: var(--font-display);
+            font-size: 1.2rem;
+            margin: 22px 0;
+            padding: 10px 20px;
+            color: var(--amber);
+            text-shadow: 2px 2px 0 var(--ink);
             letter-spacing: 2px;
+            background: rgba(15, 23, 42, 0.25);
+            border: 1.5px solid rgba(251, 191, 36, 0.35);
+            border-radius: 50px;
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
         }
+        .credit .ic { width: 20px; height: 20px; }
 
         /* Share section */
         #share-section {
-            margin-top: 18px;
+            margin-top: 20px;
             width: 100%;
             flex-direction: column;
             align-items: center;
-            animation: fadeIn 0.35s cubic-bezier(.2,.8,.2,1);
+            animation: fadeIn 0.4s cubic-bezier(.2,.8,.2,1);
         }
 
         #share-link-input {
             width: 100%;
-            font-size: 0.95rem;
+            font-size: 0.92rem;
             text-align: center;
-            margin-bottom: 15px;
-            padding: 12px;
-            background: rgba(0,0,0,0.4);
-            color: #fff;
-            border: 2px solid rgba(255,255,255,0.3);
+            margin-bottom: 16px;
+            padding: 13px;
+            background: rgba(15, 23, 42, 0.45);
+            color: var(--pearl);
+            border: 2px solid rgba(255,255,255,0.22);
             border-radius: 14px;
-            font-family: 'Inter', system-ui, sans-serif;
+            font-family: var(--font-body);
+            font-weight: 500;
             word-break: break-all;
             box-shadow: none;
         }
@@ -435,13 +556,12 @@
         }
 
         .btn-small {
-            padding: 10px 20px;
+            padding: 10px 18px;
             min-width: auto;
-            font-size: 1.1rem;
+            font-size: 1.05rem;
+            gap: 8px;
         }
-
-        .btn-pink { background: var(--pink); color: #fff; }
-        .btn-blue { background: #3498DB; color: #fff; }
+        .btn-small .ic { width: 18px; height: 18px; }
 
         /* Confetti canvas */
         #confetti-canvas {
@@ -464,27 +584,31 @@
         }
 
         @media (max-width: 600px) {
-            h1 { font-size: 1.85rem; margin-bottom: 24px; }
-            .game-question { font-size: 1.6rem; top: calc(13% + var(--safe-top)); }
-            .btn { font-size: 1.2rem; padding: 13px 28px; min-width: 160px; }
+            h1 { font-size: 1.95rem; margin-bottom: 24px; }
+            .game-question { font-size: 1.65rem; top: calc(12% + var(--safe-top)); }
+            .btn { font-size: 1.1rem; padding: 13px 26px; min-width: 160px; }
             .btn-game { font-size: 1.2rem; padding: 16px 40px; }
-            #logo { font-size: 1.4rem; }
+            .btn .ic { width: 20px; height: 20px; }
+            #logo { font-size: 1.35rem; }
+            #logo .ic { width: 26px; height: 26px; }
             .btn-row { gap: 8px; }
-            .btn-small { padding: 9px 16px; font-size: 1rem; }
-            .glass { padding: 22px 16px; border-radius: 22px; }
-            .victory-title { font-size: 1.85rem; }
-            .credit { font-size: 1.2rem; }
+            .btn-small { padding: 9px 14px; font-size: 0.95rem; }
+            .glass { padding: 24px 18px; border-radius: 24px; }
+            .victory-title { font-size: 1.95rem; }
+            .credit { font-size: 1rem; padding: 8px 16px; }
         }
 
         @media (max-height: 640px) {
-            h1 { margin-bottom: 18px; }
+            h1 { margin-bottom: 18px; font-size: 1.85rem; }
             .toggle-container { margin-bottom: 18px; }
-            .game-question { font-size: 1.4rem; top: calc(10% + var(--safe-top)); }
+            .game-question { font-size: 1.45rem; top: calc(9% + var(--safe-top)); }
+            .glass { padding: 18px 16px; }
+            .victory-title { font-size: 1.7rem; }
+            .credit { margin: 14px 0; }
         }
 
-        /* Honour reduced motion — kill drifts/shake/parallax/confetti spam */
         @media (prefers-reduced-motion: reduce) {
-            .bg-mesh, .bg-dots, #frustration-bar::after { animation: none !important; }
+            .bg-aurora, .bg-dots, #frustration-bar::after, .btn-action::after { animation: none !important; }
             .shake-1, .shake-2, .shake-3 { animation: none !important; }
             .screen { animation: none !important; }
             * { transition-duration: 0.01ms !important; }
@@ -492,9 +616,109 @@
     </style>
 </head>
 <body>
-    <div class="bg-mesh" aria-hidden="true"></div>
+    <!-- ===== SVG icon sprite (Streamline-style original line/fill icons) ===== -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+        <defs>
+            <!-- Gradients for icons -->
+            <linearGradient id="g-amber" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#fbbf24"/>
+                <stop offset="1" stop-color="#f59e0b"/>
+            </linearGradient>
+            <linearGradient id="g-emerald" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#34d399"/>
+                <stop offset="1" stop-color="#10b981"/>
+            </linearGradient>
+            <linearGradient id="g-cyan" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#22d3ee"/>
+                <stop offset="1" stop-color="#0891b2"/>
+            </linearGradient>
+            <linearGradient id="g-rose" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#fb7185"/>
+                <stop offset="1" stop-color="#e11d48"/>
+            </linearGradient>
+            <linearGradient id="g-violet" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#a78bfa"/>
+                <stop offset="1" stop-color="#7c3aed"/>
+            </linearGradient>
+
+            <!-- Game controller (logo) -->
+            <symbol id="ic-controller" viewBox="0 0 32 32">
+                <path d="M9 8h14a6 6 0 0 1 6 6v6a4 4 0 0 1-7.2 2.4L20 20h-8l-1.8 2.4A4 4 0 0 1 3 20v-6a6 6 0 0 1 6-6z" fill="url(#g-violet)" stroke="#0f172a" stroke-width="2" stroke-linejoin="round"/>
+                <circle cx="22" cy="14" r="1.6" fill="#fbbf24"/>
+                <circle cx="25" cy="17" r="1.6" fill="#34d399"/>
+                <rect x="7" y="13.5" width="5" height="1.8" rx="0.9" fill="#fafaf9"/>
+                <rect x="9.1" y="11.4" width="1.8" height="6" rx="0.9" fill="#fafaf9"/>
+            </symbol>
+
+            <!-- Rocket -->
+            <symbol id="ic-rocket" viewBox="0 0 24 24">
+                <path d="M14.5 2.5c4 0 7 3 7 7L18 13l-6-1-1-6 3.5-3.5z" fill="url(#g-amber)" stroke="#0f172a" stroke-width="1.6" stroke-linejoin="round"/>
+                <path d="M12 12l-3.5 3.5c-1.5 1.5-1.5 4 0 5.5s4 1.5 5.5 0L17.5 17.5" fill="url(#g-rose)" stroke="#0f172a" stroke-width="1.6" stroke-linejoin="round"/>
+                <circle cx="16" cy="8" r="1.6" fill="#fafaf9" stroke="#0f172a" stroke-width="1.2"/>
+                <path d="M6 18l-3 3M9 21l-2 .5M3 15l.5-2" stroke="#fbbf24" stroke-width="1.8" stroke-linecap="round"/>
+            </symbol>
+
+            <!-- Sparkle / star burst -->
+            <symbol id="ic-sparkle" viewBox="0 0 24 24">
+                <path d="M12 2l2 7 7 2-7 2-2 7-2-7-7-2 7-2 2-7z" fill="url(#g-amber)" stroke="#0f172a" stroke-width="1.6" stroke-linejoin="round"/>
+                <path d="M19 4l.8 2.2L22 7l-2.2.8L19 10l-.8-2.2L16 7l2.2-.8L19 4z" fill="#fafaf9" stroke="#0f172a" stroke-width="1.2" stroke-linejoin="round"/>
+            </symbol>
+
+            <!-- Clipboard / copy -->
+            <symbol id="ic-copy" viewBox="0 0 24 24">
+                <rect x="8" y="4" width="12" height="16" rx="2" fill="url(#g-cyan)" stroke="#0f172a" stroke-width="1.6"/>
+                <rect x="4" y="8" width="12" height="12" rx="2" fill="#fafaf9" stroke="#0f172a" stroke-width="1.6"/>
+                <path d="M7 13h6M7 16h4" stroke="#0f172a" stroke-width="1.4" stroke-linecap="round"/>
+            </symbol>
+
+            <!-- Share arrow -->
+            <symbol id="ic-share" viewBox="0 0 24 24">
+                <circle cx="6" cy="12" r="3" fill="url(#g-cyan)" stroke="#0f172a" stroke-width="1.6"/>
+                <circle cx="18" cy="5" r="3" fill="url(#g-emerald)" stroke="#0f172a" stroke-width="1.6"/>
+                <circle cx="18" cy="19" r="3" fill="url(#g-rose)" stroke="#0f172a" stroke-width="1.6"/>
+                <path d="M8.5 10.5l7-4M8.5 13.5l7 4" stroke="#0f172a" stroke-width="1.6" stroke-linecap="round"/>
+            </symbol>
+
+            <!-- Refresh -->
+            <symbol id="ic-refresh" viewBox="0 0 24 24">
+                <path d="M20 6v5h-5" stroke="#0f172a" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M19 11A8 8 0 0 0 6 6.7L3 9.5" stroke="#0f172a" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M4 18v-5h5" stroke="#0f172a" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M5 13a8 8 0 0 0 13 4.3L21 14.5" stroke="#0f172a" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            </symbol>
+
+            <!-- Lightning bolt -->
+            <symbol id="ic-bolt" viewBox="0 0 24 24">
+                <path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z" fill="url(#g-amber)" stroke="#0f172a" stroke-width="1.6" stroke-linejoin="round"/>
+            </symbol>
+
+            <!-- Trophy -->
+            <symbol id="ic-trophy" viewBox="0 0 24 24">
+                <path d="M7 4h10v6a5 5 0 0 1-10 0V4z" fill="url(#g-amber)" stroke="#0f172a" stroke-width="1.6" stroke-linejoin="round"/>
+                <path d="M7 6H4a3 3 0 0 0 3 3M17 6h3a3 3 0 0 1-3 3" stroke="#0f172a" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+                <path d="M12 15v3M8 21h8M9 21l1-3h4l1 3" fill="url(#g-amber)" stroke="#0f172a" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
+            </symbol>
+
+            <!-- Confetti popper -->
+            <symbol id="ic-popper" viewBox="0 0 24 24">
+                <path d="M4 20l5-13 6 6-13 5z" fill="url(#g-cyan)" stroke="#0f172a" stroke-width="1.6" stroke-linejoin="round"/>
+                <circle cx="16" cy="6" r="1.4" fill="#fbbf24" stroke="#0f172a" stroke-width="1"/>
+                <circle cx="20" cy="9" r="1.4" fill="#fb7185" stroke="#0f172a" stroke-width="1"/>
+                <circle cx="19" cy="14" r="1.4" fill="#34d399" stroke="#0f172a" stroke-width="1"/>
+                <circle cx="14" cy="3" r="1.2" fill="#a78bfa" stroke="#0f172a" stroke-width="1"/>
+            </symbol>
+        </defs>
+    </svg>
+
+    <div class="bg-aurora" aria-hidden="true"></div>
+    <div class="bg-noise" aria-hidden="true"></div>
+    <div class="bg-vignette" aria-hidden="true"></div>
     <div class="bg-dots" aria-hidden="true"></div>
-    <div id="logo" aria-hidden="true">🎮 Milo</div>
+
+    <div id="logo" aria-label="Milo">
+        <svg class="ic" aria-hidden="true"><use href="#ic-controller"/></svg>
+        <span>Milo</span>
+    </div>
 
     <div id="frustration-container" aria-hidden="true">
         <div id="frustration-bar"></div>
@@ -502,7 +726,6 @@
 
     <canvas id="fx-canvas" aria-hidden="true"></canvas>
 
-    <!-- live region for screen-reader -->
     <div id="sr-live" class="sr-only" aria-live="polite" aria-atomic="true"></div>
 
     <main>
@@ -514,22 +737,34 @@
             <input type="text" id="q-input" placeholder="Am I the most handsome person?" maxlength="80" autocomplete="off" inputmode="text" enterkeyhint="done">
             <div class="toggle-container">
                 <span id="toggle-label">Which answer should win?</span>
-                <div class="toggle" role="radiogroup" aria-labelledby="toggle-label">
+                <div class="toggle" role="radiogroup" aria-labelledby="toggle-label" data-winner="yes">
                     <span class="toggle-thumb" aria-hidden="true"></span>
                     <button id="toggle-yes" class="toggle-btn active" role="radio" aria-checked="true">YES</button>
                     <button id="toggle-no" class="toggle-btn" role="radio" aria-checked="false">NO</button>
                 </div>
             </div>
-            <button id="create-btn" class="btn btn-action" aria-label="Generate shareable link">🚀 Generate Link</button>
+            <button id="create-btn" class="btn btn-action" aria-label="Generate shareable link">
+                <svg class="ic" aria-hidden="true"><use href="#ic-rocket"/></svg>
+                Generate Link
+            </button>
 
             <div id="share-section" style="display:none;" aria-live="polite">
-                <h2>Game Link Ready!</h2>
+                <h2>Game Link Ready</h2>
                 <label for="share-link-input" class="sr-only">Shareable link</label>
                 <input type="text" id="share-link-input" readonly aria-readonly="true">
                 <div class="btn-row">
-                    <button id="copy-btn" class="btn btn-small btn-pink" aria-label="Copy link to clipboard">📋 Copy</button>
-                    <button id="share-api-btn" class="btn btn-small btn-blue" style="display:none;" aria-label="Share link">📤 Share</button>
-                    <button id="play-self-btn" class="btn btn-small btn-action" aria-label="Play this game now">🚀 Play</button>
+                    <button id="copy-btn" class="btn btn-small btn-pink" aria-label="Copy link to clipboard">
+                        <svg class="ic" aria-hidden="true"><use href="#ic-copy"/></svg>
+                        <span id="copy-label">Copy</span>
+                    </button>
+                    <button id="share-api-btn" class="btn btn-small btn-blue" style="display:none;" aria-label="Share link">
+                        <svg class="ic" aria-hidden="true"><use href="#ic-share"/></svg>
+                        Share
+                    </button>
+                    <button id="play-self-btn" class="btn btn-small btn-action" aria-label="Play this game now">
+                        <svg class="ic" aria-hidden="true"><use href="#ic-rocket"/></svg>
+                        Play
+                    </button>
                 </div>
             </div>
         </div>
@@ -538,7 +773,10 @@
     <!-- SCREEN 2 -->
     <section id="screen2" class="screen" aria-label="Question prompt">
         <h1 id="question-text"></h1>
-        <button id="answer-btn" class="btn btn-action">✨ Answer This</button>
+        <button id="answer-btn" class="btn btn-action">
+            <svg class="ic" aria-hidden="true"><use href="#ic-sparkle"/></svg>
+            Answer This
+        </button>
     </section>
 
     <!-- SCREEN 3 -->
@@ -554,33 +792,44 @@
 
     <!-- SCREEN 4 -->
     <section id="screen4" class="screen" aria-label="You won">
-        <h1 class="victory-title">I Knew You'd Agree! 🎉</h1>
-        <div class="credit">⚡ Developed by Arsalan ⚡</div>
-        <button id="restart-btn" class="btn btn-action">🔄 Create Your Own</button>
+        <h1 class="victory-title">I Knew You'd Agree</h1>
+        <div class="victory-sub">Game, set, match.</div>
+        <div class="credit">
+            <svg class="ic" aria-hidden="true"><use href="#ic-trophy"/></svg>
+            <span>Developed by Arsalan</span>
+            <svg class="ic" aria-hidden="true"><use href="#ic-bolt"/></svg>
+        </div>
+        <button id="restart-btn" class="btn btn-action">
+            <svg class="ic" aria-hidden="true"><use href="#ic-refresh"/></svg>
+            Create Your Own
+        </button>
     </section>
     </main>
 
     <script>
         'use strict';
 
-        // ===== ANDROID FORCED-DARK FIX (lightweight) =====
+        // ===== Android forced-dark guard =====
         (function() {
             const style = document.createElement('style');
             style.textContent = `@media (prefers-color-scheme: dark) {
-                html, body { background: #2ECC71 !important; }
-                input { background: #fff !important; color: #000 !important; }
+                html { background: #0d9488 !important; }
+                input { background: #fafaf9 !important; color: #0f172a !important; }
             }`;
             document.head.appendChild(style);
         })();
 
         const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-        // ===== DOM CACHE =====
+        // ===== DOM cache =====
         const $ = id => document.getElementById(id);
         const screen1 = $('screen1'), screen2 = $('screen2'), screen3 = $('screen3'), screen4 = $('screen4');
         const qInput = $('q-input'), shareSection = $('share-section'), shareLinkInput = $('share-link-input');
-        const toggleYes = $('toggle-yes'), toggleNo = $('toggle-no'), toggleThumb = document.querySelector('.toggle-thumb');
-        const createBtn = $('create-btn'), copyBtn = $('copy-btn'), shareApiBtn = $('share-api-btn');
+        const toggleYes = $('toggle-yes'), toggleNo = $('toggle-no');
+        const toggleEl = document.querySelector('.toggle');
+        const toggleThumb = document.querySelector('.toggle-thumb');
+        const createBtn = $('create-btn'), copyBtn = $('copy-btn'), copyLabel = $('copy-label');
+        const shareApiBtn = $('share-api-btn');
         const playSelfBtn = $('play-self-btn'), answerBtn = $('answer-btn'), restartBtn = $('restart-btn');
         const questionText = $('question-text'), gameQuestion = $('game-question');
         const winBtn = $('win-btn'), loseBtn = $('lose-btn');
@@ -591,13 +840,12 @@
         const fxCanvas = $('fx-canvas');
         const fxCtx = fxCanvas.getContext('2d');
 
-        // ===== STATE =====
+        // ===== state =====
         const urlParams = new URLSearchParams(location.search);
         const q = urlParams.get('q'), w = urlParams.get('w');
         let winningAnswer = 'yes', selectedWinner = 'yes';
         let audioCtx = null, gameActive = false, won = false;
         let mouseX = -9999, mouseY = -9999;
-        // spring state: pos, vel, target
         let loseX = 0, loseY = 0, lvx = 0, lvy = 0, targetLoseX = 0, targetLoseY = 0;
         let winPosX = 0, winPosY = 0;
         let loseScale = 1, winScale = 1;
@@ -606,20 +854,32 @@
         let winW = innerWidth, winH = innerHeight;
         let tauntPool = [], tauntIdx = 0;
         let confettiActive = false, confettiCanvas, confettiCtx, confettis = [];
+        let confettiDpr = 1, fxDpr = 1;
         let rafId = null;
         let particles = [];
-        let shakeFrames = 0, shakeMag = 0;
 
-        // ===== CANVAS RESIZE =====
-        function sizeFxCanvas() {
+        // ===== canvas DPR helpers — fix for prior streak bug =====
+        function sizeCanvas(canvas, ctx) {
             const dpr = Math.min(window.devicePixelRatio || 1, 2);
-            fxCanvas.width = winW * dpr;
-            fxCanvas.height = winH * dpr;
-            fxCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            canvas.width = Math.floor(winW * dpr);
+            canvas.height = Math.floor(winH * dpr);
+            // Reset to identity then apply DPR scale — never leave canvas in mid-transform
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            return dpr;
         }
-        sizeFxCanvas();
+        function clearCanvas(ctx, dpr) {
+            // Always clear in raw pixel space to wipe full buffer regardless of current transform
+            ctx.save();
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            ctx.restore();
+            // Re-establish DPR scale for subsequent draws
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
 
-        // ===== INIT =====
+        fxDpr = sizeCanvas(fxCanvas, fxCtx);
+
+        // ===== init from URL =====
         if (q && w) {
             winningAnswer = w.toLowerCase();
             questionText.textContent = decodeURIComponent(q);
@@ -628,7 +888,7 @@
             screen1.style.display = 'flex';
         }
 
-        // ===== SCREEN 1 — TOGGLE =====
+        // ===== SCREEN 1 — toggle =====
         function setToggle(which) {
             selectedWinner = which;
             const yesActive = which === 'yes';
@@ -636,6 +896,7 @@
             toggleNo.classList.toggle('active', !yesActive);
             toggleYes.setAttribute('aria-checked', yesActive ? 'true' : 'false');
             toggleNo.setAttribute('aria-checked', yesActive ? 'false' : 'true');
+            toggleEl.setAttribute('data-winner', which);
             toggleThumb.style.transform = yesActive ? 'translateX(0)' : 'translateX(100%)';
         }
         toggleYes.addEventListener('click', () => setToggle('yes'));
@@ -654,19 +915,19 @@
                 shareLinkInput.select();
                 shareLinkInput.setSelectionRange(0, 99999);
                 const done = () => {
-                    copyBtn.textContent = '✅ Copied!';
+                    copyLabel.textContent = 'Copied';
                     srLive.textContent = 'Link copied to clipboard';
-                    setTimeout(() => copyBtn.textContent = '📋 Copy', 1500);
+                    setTimeout(() => copyLabel.textContent = 'Copy', 1500);
                 };
                 if (navigator.clipboard) navigator.clipboard.writeText(newUrl).then(done).catch(() => { document.execCommand('copy'); done(); });
                 else { document.execCommand('copy'); done(); }
             };
 
             if (navigator.share) {
-                shareApiBtn.style.display = 'inline-block';
+                shareApiBtn.style.display = 'inline-flex';
                 shareApiBtn.onclick = () => navigator.share({
                     title: 'Milo - The Fun Game',
-                    text: 'I created a fun game for you! Play it now:',
+                    text: 'I created a fun game for you. Play it now:',
                     url: newUrl
                 }).catch(() => {});
             }
@@ -690,23 +951,24 @@
         answerBtn.addEventListener('click', toScreen3);
         answerBtn.addEventListener('touchstart', e => { e.preventDefault(); toScreen3(); }, { passive: false });
 
-        // ===== POINTER PARALLAX (subtle) =====
+        // ===== pointer parallax =====
         if (!REDUCED) {
             window.addEventListener('pointermove', e => {
                 if (gameActive) return;
-                const x = (e.clientX / winW - 0.5) * 10;
-                const y = (e.clientY / winH - 0.5) * 10;
+                const x = (e.clientX / winW - 0.5) * 12;
+                const y = (e.clientY / winH - 0.5) * 12;
                 bgDots.style.setProperty('--px', x + 'px');
                 bgDots.style.setProperty('--py', y + 'px');
             }, { passive: true });
         }
 
-        // ===== GAME PHYSICS — critically-damped spring =====
+        // ===== game physics =====
         function setPos(el, x, y, s) {
             el.style.transform = `translate3d(${x|0}px, ${y|0}px, 0) scale(${s})`;
         }
 
         function startGame() {
+            document.body.classList.add('in-game');
             screen3.style.display = 'block';
             frustrationContainer.style.display = 'block';
             gameQuestion.textContent = decodeURIComponent(q);
@@ -724,7 +986,7 @@
             loseBtn.setAttribute('aria-label', 'Losing answer: ' + loseBtn.textContent);
 
             winW = innerWidth; winH = innerHeight;
-            sizeFxCanvas();
+            fxDpr = sizeCanvas(fxCanvas, fxCtx);
             const cx = winW >> 1, cy = (winH * 0.55) | 0;
 
             if (winW < 600) {
@@ -799,7 +1061,6 @@
             lastRunTime = now;
 
             const padX = winW * 0.08, padY = winH * 0.14;
-            // jump anywhere on screen, but away from pointer
             let tx, ty, tries = 0;
             do {
                 tx = padX + Math.random() * (winW - padX * 2 - 160);
@@ -809,7 +1070,6 @@
             targetLoseX = tx;
             targetLoseY = ty;
 
-            // give it a velocity kick away from pointer for snappy escape feel
             const dx = (loseX + 80) - mouseX;
             const dy = (loseY + 25) - mouseY;
             const d = Math.hypot(dx, dy) || 1;
@@ -821,8 +1081,6 @@
             spawnTrail(loseX + 80, loseY + 25);
             playWhoosh();
             if (navigator.vibrate && frustration < 100) navigator.vibrate(18);
-
-            // shake increases w/ frustration
             triggerShake();
         }
 
@@ -840,12 +1098,11 @@
             if (REDUCED) return;
             const level = frustration < 30 ? 1 : frustration < 70 ? 2 : 3;
             screen3.classList.remove('shake-1','shake-2','shake-3');
-            // force reflow so animation restarts
             void screen3.offsetWidth;
             screen3.classList.add('shake-' + level);
         }
 
-        // ===== MAIN LOOP =====
+        // ===== main loop =====
         let lastFrame = performance.now();
         let frameCount = 0;
 
@@ -857,9 +1114,8 @@
             lastFrame = now;
             frameCount++;
 
-            // Critically-damped spring toward target
-            const k = 0.18; // stiffness
-            const d = 0.78; // damping
+            const k = 0.18;
+            const d = 0.78;
             const ax = (targetLoseX - loseX) * k;
             const ay = (targetLoseY - loseY) * k;
             lvx = (lvx + ax * dt) * Math.pow(d, dt);
@@ -873,7 +1129,6 @@
             setPos(loseBtnC, loseX, loseY, loseScale);
             setPos(winBtnC, winPosX, winPosY, winScale);
 
-            // Distance check every 2 frames
             if (frameCount % 2 === 0) {
                 const dxm = mouseX - (loseX + 80), dym = mouseY - (loseY + 25);
                 const dist = Math.sqrt(dxm*dxm + dym*dym);
@@ -884,38 +1139,40 @@
             renderParticles(dt);
         }
 
-        // ===== PARTICLE TRAIL =====
+        // ===== particle trail =====
+        const PARTICLE_HUES = [340, 25, 165, 195, 260, 50]; // rose, amber, emerald, cyan, violet, gold
         function spawnTrail(x, y) {
             if (REDUCED) return;
-            const n = 10;
+            const n = 12;
             for (let i = 0; i < n; i++) {
                 const a = Math.random() * Math.PI * 2;
-                const sp = Math.random() * 3 + 1;
+                const sp = Math.random() * 3.5 + 1;
                 particles.push({
                     x, y,
                     vx: Math.cos(a) * sp,
                     vy: Math.sin(a) * sp,
                     life: 1,
-                    decay: 0.025 + Math.random() * 0.02,
-                    size: Math.random() * 4 + 2,
-                    hue: 320 + Math.random() * 40
+                    decay: 0.022 + Math.random() * 0.022,
+                    size: Math.random() * 4.5 + 2,
+                    hue: PARTICLE_HUES[(Math.random() * PARTICLE_HUES.length) | 0],
+                    sat: 85 + Math.random() * 15,
+                    lit: 60 + Math.random() * 10
                 });
             }
-            // hard cap
-            if (particles.length > 250) particles.splice(0, particles.length - 250);
+            if (particles.length > 240) particles.splice(0, particles.length - 240);
         }
 
         function renderParticles(dt) {
-            fxCtx.clearRect(0, 0, winW, winH);
+            clearCanvas(fxCtx, fxDpr);
             for (let i = particles.length - 1; i >= 0; i--) {
                 const p = particles[i];
                 p.x += p.vx * dt;
                 p.y += p.vy * dt;
-                p.vy += 0.08 * dt;
+                p.vy += 0.09 * dt;
                 p.life -= p.decay * dt;
                 if (p.life <= 0) { particles.splice(i, 1); continue; }
                 fxCtx.globalAlpha = Math.max(0, p.life);
-                fxCtx.fillStyle = `hsl(${p.hue}, 100%, 65%)`;
+                fxCtx.fillStyle = `hsl(${p.hue}, ${p.sat}%, ${p.lit}%)`;
                 fxCtx.beginPath();
                 fxCtx.arc(p.x, p.y, p.size * p.life, 0, 6.2832);
                 fxCtx.fill();
@@ -923,8 +1180,8 @@
             fxCtx.globalAlpha = 1;
         }
 
-        // ===== TAUNT POOL =====
-        const taunts = ["😜 Nice try!","😝 Close!","🙅 Nope!","😏 Too slow!","😈 Almost!","😎 Sike!","🤪 Missed!","🤣 Whoops!","😤 Try again!","🤭 Haha!"];
+        // ===== taunts =====
+        const taunts = ["Nice try", "Close", "Nope", "Too slow", "Almost", "Sike", "Missed", "Whoops", "Try again", "Haha"];
 
         function initTaunts() {
             for (let i = 0; i < 5; i++) {
@@ -946,12 +1203,12 @@
             el.style.display = 'block';
             el.style.animation = 'none';
             void el.offsetHeight;
-            el.style.animation = 'tauntUp 0.75s cubic-bezier(.2,.8,.2,1) forwards';
+            el.style.animation = 'tauntUp 0.78s cubic-bezier(.2,.8,.2,1) forwards';
             clearTimeout(el._t);
-            el._t = setTimeout(() => el.style.display = 'none', 760);
+            el._t = setTimeout(() => el.style.display = 'none', 800);
         }
 
-        // ===== VICTORY =====
+        // ===== victory =====
         function winGame() {
             if (won || !gameActive) return;
             won = true; gameActive = false;
@@ -963,10 +1220,11 @@
             screen3.classList.remove('shake-1','shake-2','shake-3');
 
             frustrationContainer.style.display = 'none';
-            fxCtx.clearRect(0, 0, winW, winH);
+            clearCanvas(fxCtx, fxDpr);
             screen3.style.display = 'none';
             screen4.style.display = 'flex';
-            srLive.textContent = 'You won!';
+            document.body.classList.remove('in-game');
+            srLive.textContent = 'You won';
 
             playVictorySound();
             startConfetti();
@@ -975,7 +1233,7 @@
         restartBtn.addEventListener('click', () => location.href = location.origin + location.pathname);
         restartBtn.addEventListener('touchstart', e => { e.preventDefault(); location.href = location.origin + location.pathname; }, { passive: false });
 
-        // ===== AUDIO =====
+        // ===== audio =====
         function playWhoosh() {
             if (!audioCtx) return;
             try {
@@ -984,14 +1242,13 @@
                 const gain = audioCtx.createGain();
                 const filt = audioCtx.createBiquadFilter();
                 osc.type = 'sawtooth';
-                // pitch climbs w/ frustration
                 const baseFreq = 320 + frustration * 6;
                 osc.frequency.setValueAtTime(baseFreq, t);
                 osc.frequency.exponentialRampToValueAtTime(baseFreq * 0.4, t + 0.18);
                 filt.type = 'lowpass';
                 filt.frequency.setValueAtTime(1800, t);
                 gain.gain.setValueAtTime(0, t);
-                gain.gain.linearRampToValueAtTime(0.08, t + 0.02);
+                gain.gain.linearRampToValueAtTime(0.07, t + 0.02);
                 gain.gain.exponentialRampToValueAtTime(0.0005, t + 0.2);
                 osc.connect(filt); filt.connect(gain); gain.connect(audioCtx.destination);
                 osc.start(t);
@@ -1023,12 +1280,15 @@
                 play(659.25, t + 0.07, 0.14);
                 play(783.99, t + 0.14, 0.28);
                 play(1046.50, t + 0.22, 0.45);
-                // sparkle layer
                 play(1318.51, t + 0.28, 0.4, 'triangle');
             } catch (e) { /* ignore */ }
         }
 
-        // ===== CONFETTI =====
+        // ===== confetti — fixed DPR handling, refined visuals =====
+        const CONFETTI_COLORS = ['#fb7185', '#22d3ee', '#34d399', '#fbbf24', '#a78bfa', '#fafaf9', '#f472b6', '#60a5fa'];
+        const TERMINAL_VY = 6;     // soft terminal velocity for rain
+        const TERMINAL_VY_BURST = 14;
+
         function startConfetti() {
             if (confettiActive) return;
             confettiActive = true;
@@ -1037,46 +1297,45 @@
             confettiCanvas.id = 'confetti-canvas';
             document.body.appendChild(confettiCanvas);
             confettiCtx = confettiCanvas.getContext('2d', { alpha: true });
-            const dpr = Math.min(window.devicePixelRatio || 1, 2);
-            confettiCanvas.width = winW * dpr;
-            confettiCanvas.height = winH * dpr;
-            confettiCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            confettiDpr = sizeCanvas(confettiCanvas, confettiCtx);
 
-            const colors = ['#FF1493','#00FFFF','#32CD32','#FFD700','#FFFFFF','#9D00FF','#FF6B00','#2ECC71'];
-            const count = REDUCED ? 30 : (winW < 600 ? 70 : 120);
-            const shapes = ['rect','circle','strip'];
+            const burst = REDUCED ? 0 : (winW < 600 ? 50 : 90);
+            const rain = REDUCED ? 18 : (winW < 600 ? 25 : 40);
+            const shapes = ['rect', 'circle', 'strip', 'ribbon'];
 
-            // initial cannon burst from bottom corners
-            for (let i = 0; i < count; i++) {
+            // dual cannon burst from bottom corners
+            for (let i = 0; i < burst; i++) {
                 const fromLeft = i % 2 === 0;
                 confettis.push({
+                    type: 'burst',
                     x: fromLeft ? -10 : winW + 10,
-                    y: winH + 10,
-                    w: (Math.random() * 7 + 4) | 0,
-                    h: (Math.random() * 10 + 4) | 0,
-                    c: colors[(Math.random() * colors.length) | 0],
-                    vx: (fromLeft ? 1 : -1) * (Math.random() * 6 + 5),
-                    vy: -(Math.random() * 9 + 11),
-                    g: 0.32,
+                    y: winH - 20,
+                    w: (Math.random() * 8 + 5) | 0,
+                    h: (Math.random() * 10 + 5) | 0,
+                    c: CONFETTI_COLORS[(Math.random() * CONFETTI_COLORS.length) | 0],
+                    vx: (fromLeft ? 1 : -1) * (Math.random() * 7 + 6),
+                    vy: -(Math.random() * 10 + 12),
+                    g: 0.36,
                     rot: Math.random() * 6.28,
-                    vr: (Math.random() - 0.5) * 0.22,
-                    shape: shapes[(Math.random() * shapes.length) | 0]
+                    vr: (Math.random() - 0.5) * 0.30,
+                    shape: shapes[(Math.random() * shapes.length) | 0],
+                    drag: 0.985
                 });
             }
             // gentle rain layer
-            const rain = REDUCED ? 0 : (winW < 600 ? 30 : 50);
             for (let i = 0; i < rain; i++) {
                 confettis.push({
+                    type: 'rain',
                     x: Math.random() * winW,
                     y: -Math.random() * winH,
                     w: (Math.random() * 7 + 3) | 0,
                     h: (Math.random() * 7 + 3) | 0,
-                    c: colors[(Math.random() * colors.length) | 0],
+                    c: CONFETTI_COLORS[(Math.random() * CONFETTI_COLORS.length) | 0],
                     vx: (Math.random() - 0.5) * 1.6,
-                    vy: Math.random() * 3 + 2,
-                    g: 0.05,
+                    vy: Math.random() * 2 + 1.5,
+                    g: 0.04,
                     rot: Math.random() * 6.28,
-                    vr: (Math.random() - 0.5) * 0.12,
+                    vr: (Math.random() - 0.5) * 0.10,
                     osc: Math.random() * 6.28,
                     oscSpd: Math.random() * 0.04 + 0.015,
                     shape: shapes[(Math.random() * shapes.length) | 0]
@@ -1087,11 +1346,18 @@
 
         function renderConfetti() {
             if (!confettiActive) return;
-            confettiCtx.clearRect(0, 0, winW, winH);
+            clearCanvas(confettiCtx, confettiDpr);
 
             for (let i = 0, n = confettis.length; i < n; i++) {
                 const p = confettis[i];
+
+                // physics
                 p.vy += p.g;
+                if (p.drag) { p.vx *= p.drag; p.vy *= p.drag; }
+                // terminal velocity guard
+                const term = p.type === 'burst' ? TERMINAL_VY_BURST : TERMINAL_VY;
+                if (p.vy > term) p.vy = term;
+
                 p.y += p.vy;
                 if (p.osc !== undefined) {
                     p.x += p.vx + Math.sin(p.osc) * 1.2;
@@ -1102,52 +1368,62 @@
                 p.rot += p.vr;
 
                 // recycle rainers
-                if (p.osc !== undefined && p.y > winH) {
+                if (p.type === 'rain' && p.y > winH) {
                     p.y = -12;
                     p.x = Math.random() * winW;
-                    p.vy = Math.random() * 3 + 2;
+                    p.vy = Math.random() * 2 + 1.5;
                 }
 
                 const cos = Math.cos(p.rot), sin = Math.sin(p.rot);
-                confettiCtx.setTransform(cos, sin, -sin, cos, p.x, p.y);
+                // setTransform now in DPR-scaled space because clearCanvas restored DPR
+                confettiCtx.setTransform(
+                    confettiDpr * cos, confettiDpr * sin,
+                    -confettiDpr * sin, confettiDpr * cos,
+                    p.x * confettiDpr, p.y * confettiDpr
+                );
                 confettiCtx.fillStyle = p.c;
+
                 if (p.shape === 'circle') {
                     confettiCtx.beginPath();
                     confettiCtx.arc(0, 0, p.w/2, 0, 6.2832);
                     confettiCtx.fill();
                 } else if (p.shape === 'strip') {
-                    confettiCtx.fillRect(-p.w/2, -p.h, p.w, p.h*2);
+                    // thin tall — modest, not extreme
+                    confettiCtx.fillRect(-p.w/2, -p.h, p.w, p.h * 1.6);
+                } else if (p.shape === 'ribbon') {
+                    // curved ribbon look — two stacked rects offset
+                    confettiCtx.fillRect(-p.w/2, -p.h/2, p.w, p.h/2);
+                    confettiCtx.globalAlpha = 0.7;
+                    confettiCtx.fillRect(-p.w/2, 0, p.w, p.h/2);
+                    confettiCtx.globalAlpha = 1;
                 } else {
                     confettiCtx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
                 }
             }
 
-            confettiCtx.setTransform(1, 0, 0, 1, 0, 0);
-            // cull cannon particles that fell offscreen + have no recycle
+            // reset transform back to DPR identity to avoid leaking state
+            confettiCtx.setTransform(confettiDpr, 0, 0, confettiDpr, 0, 0);
+
+            // cull burst particles that fell off screen
             for (let i = confettis.length - 1; i >= 0; i--) {
                 const p = confettis[i];
-                if (p.osc === undefined && p.y > winH + 80) confettis.splice(i, 1);
+                if (p.type === 'burst' && p.y > winH + 100) confettis.splice(i, 1);
             }
             requestAnimationFrame(renderConfetti);
         }
 
-        // ===== RESIZE =====
+        // ===== resize =====
         let resizeTimeout;
         window.addEventListener('resize', () => {
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(() => {
                 winW = innerWidth; winH = innerHeight;
-                sizeFxCanvas();
-                if (confettiCanvas) {
-                    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-                    confettiCanvas.width = winW * dpr;
-                    confettiCanvas.height = winH * dpr;
-                    confettiCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-                }
+                fxDpr = sizeCanvas(fxCanvas, fxCtx);
+                if (confettiCanvas) confettiDpr = sizeCanvas(confettiCanvas, confettiCtx);
             }, 150);
         }, { passive: true });
 
-        // Pause loop when tab hidden — save battery
+        // pause loop when tab hidden
         document.addEventListener('visibilitychange', () => {
             if (document.hidden && rafId) {
                 cancelAnimationFrame(rafId);
