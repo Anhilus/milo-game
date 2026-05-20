@@ -74,7 +74,17 @@
         }
 
         /* Fallback solid base under mesh (in case backdrop-filter / radial gradients fail) */
-        html { background: var(--bg-1); }
+        html { background: var(--bg-1); -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+
+        /* main must fill the flex container so %-widths on .screen resolve against full viewport */
+        main {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 0;
+        }
 
         /* ===== Layered background ===== */
         /* Aurora mesh — flowing jewel tones */
@@ -607,10 +617,18 @@
             .credit { margin: 14px 0; }
         }
 
+        /* Win button glow pulse — triggers at high frustration */
+        @keyframes winGlow {
+            0%, 100% { box-shadow: 4px 8px 0 var(--ink), 0 14px 40px rgba(15,23,42,0.25); }
+            50%       { box-shadow: 4px 8px 0 var(--ink), 0 0 40px rgba(251,191,36,0.8), 0 14px 40px rgba(15,23,42,0.25); }
+        }
+        .win-pulse { animation: winGlow 0.65s ease-in-out infinite; }
+
         @media (prefers-reduced-motion: reduce) {
             .bg-aurora, .bg-dots, #frustration-bar::after, .btn-action::after { animation: none !important; }
             .shake-1, .shake-2, .shake-3 { animation: none !important; }
             .screen { animation: none !important; }
+            .win-pulse { animation: none !important; }
             * { transition-duration: 0.01ms !important; }
         }
     </style>
@@ -844,7 +862,7 @@
         const urlParams = new URLSearchParams(location.search);
         const q = urlParams.get('q'), w = urlParams.get('w');
         let winningAnswer = 'yes', selectedWinner = 'yes';
-        let audioCtx = null, gameActive = false, won = false;
+        let audioCtx = null, gameActive = false, won = false, loseBtnText = 'NO';
         let mouseX = -9999, mouseY = -9999;
         let loseX = 0, loseY = 0, lvx = 0, lvy = 0, targetLoseX = 0, targetLoseY = 0;
         let winPosX = 0, winPosY = 0;
@@ -982,6 +1000,7 @@
                 winBtn.className = 'btn-game btn-no';
                 loseBtn.className = 'btn-game btn-yes';
             }
+            loseBtnText = loseBtn.textContent;
             winBtn.setAttribute('aria-label', 'Winning answer: ' + winBtn.textContent);
             loseBtn.setAttribute('aria-label', 'Losing answer: ' + loseBtn.textContent);
 
@@ -1015,6 +1034,7 @@
             gameActive = true; won = false; frustration = 0;
             frustrationBar.style.width = '0%';
             winBtnC.style.setProperty('--halo', 0);
+            winBtn.classList.remove('win-pulse');
             lastRunTime = performance.now();
             lastFrame = performance.now();
             particles.length = 0;
@@ -1090,7 +1110,11 @@
             showTaunt(loseX + 80, loseY + 25);
             loseTargetScale = Math.max(0.45, loseTargetScale - 0.035);
             winTargetScale = Math.min(1.45, winTargetScale + 0.045);
+            // dynamic lose-button emoji escalates with frustration
+            const runSuffix = frustration >= 80 ? ' 😱' : frustration >= 50 ? ' 🏃💨' : frustration >= 30 ? ' 👀' : '';
+            loseBtn.textContent = loseBtnText + runSuffix;
             winBtnC.style.setProperty('--halo', (frustration / 100).toFixed(2));
+            if (frustration >= 80 && !REDUCED) winBtn.classList.add('win-pulse');
             if (frustration >= 60) srLive.textContent = 'Almost there — tap the highlighted button';
         }
 
@@ -1181,7 +1205,7 @@
         }
 
         // ===== taunts =====
-        const taunts = ["Nice try", "Close", "Nope", "Too slow", "Almost", "Sike", "Missed", "Whoops", "Try again", "Haha"];
+        const taunts = ["Nice try 😏", "Close 👀", "Nope 🤣", "Too slow ⚡", "Almost 😈", "Sike 💨", "Missed 🙈", "Whoops 🫣", "Try again 🏃", "Haha 😂"];
 
         function initTaunts() {
             for (let i = 0; i < 5; i++) {
@@ -1219,6 +1243,7 @@
             screen3.removeEventListener('touchend', onTouchEnd);
             screen3.classList.remove('shake-1','shake-2','shake-3');
 
+            winBtn.classList.remove('win-pulse');
             frustrationContainer.style.display = 'none';
             clearCanvas(fxCtx, fxDpr);
             screen3.style.display = 'none';
@@ -1286,6 +1311,7 @@
 
         // ===== confetti — fixed DPR handling, refined visuals =====
         const CONFETTI_COLORS = ['#fb7185', '#22d3ee', '#34d399', '#fbbf24', '#a78bfa', '#fafaf9', '#f472b6', '#60a5fa'];
+        const WIN_EMOJIS = ['🎉', '⭐', '✨', '💫', '🏆', '🥳', '🎊', '💥', '🌟', '🎈'];
         const TERMINAL_VY = 6;     // soft terminal velocity for rain
         const TERMINAL_VY_BURST = 14;
 
@@ -1341,6 +1367,23 @@
                     shape: shapes[(Math.random() * shapes.length) | 0]
                 });
             }
+            // floating emoji shower
+            const emojiCount = REDUCED ? 0 : (winW < 600 ? 8 : 14);
+            for (let i = 0; i < emojiCount; i++) {
+                confettis.push({
+                    type: 'emoji',
+                    emoji: WIN_EMOJIS[(Math.random() * WIN_EMOJIS.length) | 0],
+                    x: Math.random() * winW,
+                    y: -30 - Math.random() * winH * 0.6,
+                    vx: (Math.random() - 0.5) * 2,
+                    vy: Math.random() * 1.5 + 0.8,
+                    g: 0.02,
+                    rot: 0, vr: 0,
+                    size: (26 + Math.random() * 18) | 0,
+                    osc: Math.random() * 6.28,
+                    oscSpd: Math.random() * 0.025 + 0.01
+                });
+            }
             requestAnimationFrame(renderConfetti);
         }
 
@@ -1372,6 +1415,16 @@
                     p.y = -12;
                     p.x = Math.random() * winW;
                     p.vy = Math.random() * 2 + 1.5;
+                }
+
+                // emoji type — draw as text, no rotation transform needed
+                if (p.type === 'emoji') {
+                    if (p.y > winH + 50) { p.y = -30; p.x = Math.random() * winW; }
+                    confettiCtx.setTransform(confettiDpr, 0, 0, confettiDpr, 0, 0);
+                    confettiCtx.font = `${p.size}px sans-serif`;
+                    confettiCtx.textBaseline = 'middle';
+                    confettiCtx.fillText(p.emoji, p.x, p.y);
+                    continue;
                 }
 
                 const cos = Math.cos(p.rot), sin = Math.sin(p.rot);
